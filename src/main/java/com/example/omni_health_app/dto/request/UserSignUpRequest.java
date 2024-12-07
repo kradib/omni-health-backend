@@ -1,4 +1,4 @@
-package com.example.omni_health_app.dto;
+package com.example.omni_health_app.dto.request;
 
 import lombok.Data;
 import lombok.NonNull;
@@ -16,7 +16,7 @@ public class UserSignUpRequest {
     @NonNull
     private String emailId;
     private String phoneNumber;
-    private String guardian1UserId;
-    private String guardian2UserId;
+    private String firstGuardianUserId;
+    private String secondGuardianUserId;
 
 }

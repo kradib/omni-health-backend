@@ -1,4 +1,4 @@
-package com.example.omni_health_app.dto;
+package com.example.omni_health_app.dto.request;
 
 import lombok.Data;
 import lombok.NonNull;
