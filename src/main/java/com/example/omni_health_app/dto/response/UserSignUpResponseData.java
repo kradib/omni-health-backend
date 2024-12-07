@@ -6,7 +6,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class UserSIgnUpResponseData {
+public class UserSignUpResponseData {
 
     private String username;
 }

@@ -4,7 +4,7 @@ package com.example.omni_health_app.controller;
 import com.example.omni_health_app.dto.request.UserSignUpRequest;
 import com.example.omni_health_app.dto.response.ResponseMetadata;
 import com.example.omni_health_app.dto.response.ResponseWrapper;
-import com.example.omni_health_app.dto.response.UserSIgnUpResponseData;
+import com.example.omni_health_app.dto.response.UserSignUpResponseData;
 import com.example.omni_health_app.dto.response.UserSignUpResponse;
 import com.example.omni_health_app.exception.UserAuthException;
 import com.example.omni_health_app.service.UserAuthService;
@@ -26,10 +26,10 @@ public class UserController {
     private final UserAuthService userAuthService;
 
     @PostMapping("/signup")
-    public ResponseEntity<ResponseWrapper<UserSIgnUpResponseData>> signUp(@RequestBody UserSignUpRequest request) throws UserAuthException {
+    public ResponseEntity<ResponseWrapper<UserSignUpResponseData>> signUp(@RequestBody UserSignUpRequest request) throws UserAuthException {
         log.info("Receive user sign up request {}", request);
-        final ResponseWrapper<UserSIgnUpResponseData> responseWrapper = UserSignUpResponse.builder()
-                .data(UserSIgnUpResponseData.builder()
+        final ResponseWrapper<UserSignUpResponseData> responseWrapper = UserSignUpResponse.builder()
+                .data(UserSignUpResponseData.builder()
                         .username(userAuthService.signUp(request))
                         .build())
                 .responseMetadata(ResponseMetadata.builder()
