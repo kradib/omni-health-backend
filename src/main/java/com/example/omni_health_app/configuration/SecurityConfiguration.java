@@ -23,6 +23,7 @@ public class SecurityConfiguration {
                 .disable() // Disable CSRF for simplicity in development
                 .authorizeHttpRequests()
                 .requestMatchers("/api/v1/user/signup").permitAll() // Allow signup and signin
+                .requestMatchers("/api/v1/user/signin").permitAll() // Allow signup and signin
                 .anyRequest().authenticated() // Protect all other endpoints
                 .and()
                 .httpBasic(); // Use basic authentication for testing

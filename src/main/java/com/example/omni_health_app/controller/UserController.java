@@ -1,13 +1,12 @@
 package com.example.omni_health_app.controller;
 
 
+import com.example.omni_health_app.dto.request.UserSignInRequest;
 import com.example.omni_health_app.dto.request.UserSignUpRequest;
-import com.example.omni_health_app.dto.response.ResponseMetadata;
-import com.example.omni_health_app.dto.response.ResponseWrapper;
-import com.example.omni_health_app.dto.response.UserSignUpResponseData;
-import com.example.omni_health_app.dto.response.UserSignUpResponse;
+import com.example.omni_health_app.dto.response.*;
 import com.example.omni_health_app.exception.UserAuthException;
 import com.example.omni_health_app.service.UserAuthService;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -26,7 +25,7 @@ public class UserController {
     private final UserAuthService userAuthService;
 
     @PostMapping("/signup")
-    public ResponseEntity<ResponseWrapper<UserSignUpResponseData>> signUp(@RequestBody UserSignUpRequest request) throws UserAuthException {
+    public ResponseEntity<ResponseWrapper<UserSignUpResponseData>> signUp(@RequestBody @NonNull UserSignUpRequest request) throws UserAuthException {
         log.info("Receive user sign up request {}", request);
         final ResponseWrapper<UserSignUpResponseData> responseWrapper = UserSignUpResponse.builder()
                 .data(UserSignUpResponseData.builder()
@@ -39,6 +38,21 @@ public class UserController {
                 .build();
         return ResponseEntity.ok(responseWrapper);
 
+    }
+
+    @PostMapping("/signin")
+    public ResponseEntity<ResponseWrapper<UserSignInResponseData>> signIn(@RequestBody @NonNull UserSignInRequest request) throws UserAuthException {
+        log.info("Received user sign-in request for username: {}", request.getUsername());
+        final ResponseWrapper<UserSignInResponseData> responseWrapper = UserSignInResponse.builder()
+                .data(UserSignInResponseData.builder()
+                        .authToken(userAuthService.signIn(request))
+                        .build())
+                .responseMetadata(ResponseMetadata.builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .errorCode(0)
+                        .build())
+                .build();
+        return ResponseEntity.ok(responseWrapper);
     }
 
 

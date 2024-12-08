@@ -3,8 +3,10 @@ package com.example.omni_health_app.service;
 import com.example.omni_health_app.domain.entity.UserAuth;
 import com.example.omni_health_app.domain.entity.UserDetails;
 import com.example.omni_health_app.domain.repositories.UserAuthRepository;
+import com.example.omni_health_app.dto.request.UserSignInRequest;
 import com.example.omni_health_app.dto.request.UserSignUpRequest;
 import com.example.omni_health_app.exception.UserAuthException;
+import com.example.omni_health_app.util.TokenUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -19,6 +21,8 @@ public class UserAuthService {
     private final UserAuthRepository userAuthRepository;
 
     private final PasswordEncoder passwordEncoder;
+
+    private final TokenUtil tokenUtil;
 
     public String signUp(UserSignUpRequest request) throws UserAuthException {
         if (userAuthRepository.existsByUsername(request.getUsername())) {
@@ -48,5 +52,17 @@ public class UserAuthService {
         UserAuth savedUser = userAuthRepository.save(userAuth);
         log.info("Successfully registered user {}", savedUser.getUserDetails());
         return userAuth.getUsername();
+    }
+
+
+    public String signIn(UserSignInRequest request) throws UserAuthException {
+        UserAuth userAuth = userAuthRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new UserAuthException("The User name does not exist"));
+
+        if (!passwordEncoder.matches(request.getPassword(), userAuth.getPassword())) {
+            throw new UserAuthException("Invalid pass word provided");
+        }
+
+        return tokenUtil.generateToken(userAuth.getUsername());
     }
 }
