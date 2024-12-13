@@ -7,3 +7,4 @@ CREATE TABLE user_details (
     first_guardian_user_id VARCHAR(15) NULL,
     second_guardian_user_id VARCHAR(15) NULL
 );
+CREATE INDEX idx_user_details_id ON user_details(id);

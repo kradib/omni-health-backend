@@ -5,3 +5,4 @@ CREATE TABLE user_auth (
     user_details_id BIGINT UNIQUE,
     FOREIGN KEY (user_details_id) REFERENCES user_details(id) ON DELETE CASCADE
 );
+CREATE INDEX idx_username ON user_auth(username);
