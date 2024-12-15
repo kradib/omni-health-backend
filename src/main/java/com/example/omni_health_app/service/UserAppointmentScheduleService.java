@@ -5,7 +5,9 @@ import com.example.omni_health_app.domain.entity.UserAuth;
 import com.example.omni_health_app.domain.model.AppointmentStatus;
 import com.example.omni_health_app.domain.repositories.UserAppointmentScheduleRepository;
 import com.example.omni_health_app.domain.repositories.UserAuthRepository;
+import com.example.omni_health_app.dto.request.CancelAppointmentRequest;
 import com.example.omni_health_app.dto.request.CreateAppointmentRequest;
+import com.example.omni_health_app.dto.response.CancelAppointmentResponseData;
 import com.example.omni_health_app.dto.response.CreateAppointmentResponseData;
 import com.example.omni_health_app.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
@@ -41,6 +43,27 @@ public class UserAppointmentScheduleService {
                     .build();
         }).orElseThrow(()-> new BadRequestException(String.format("user %s does not exists", dto.getUsername())));
 
+    }
+
+    public CancelAppointmentResponseData cancelAppointmentSchedule(CancelAppointmentRequest dto) throws BadRequestException {
+        final Optional<UserAuth> userAuthOptional = userAuthRepository.findByUsername(dto.getUsername());
+        if(userAuthOptional.isEmpty()) {
+            throw new BadRequestException(String.format("user %s does not exists", dto.getUsername()));
+        }
+        final Optional<UserAppointmentSchedule> userAppointmentScheduleOptional = userAppointmentScheduleRepository.findById(dto.getAppointmentId());
+        if(userAppointmentScheduleOptional.isEmpty()) {
+            throw new BadRequestException(String.format("AppointId %s for user %s does not exists", dto.getAppointmentId(), dto.getUsername()));
+        }
+        final UserAppointmentSchedule userAppointmentSchedule = userAppointmentScheduleOptional.get();
+        if(!userAppointmentSchedule.getUsername().equals(dto.getUsername())) {
+            throw new BadRequestException(String.format("AppointId %s does not belong to this user %s ", dto.getAppointmentId(), dto.getUsername()));
+        }
+        userAppointmentSchedule.setStatus(AppointmentStatus.CANCELLED.getStatus());
+        userAppointmentScheduleRepository.save(userAppointmentSchedule);
+        return CancelAppointmentResponseData.builder()
+                .success(true)
+                .appointmentId(dto.getAppointmentId())
+                .build();
     }
 
 }
