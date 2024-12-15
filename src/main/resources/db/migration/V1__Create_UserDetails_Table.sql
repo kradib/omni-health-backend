@@ -1,4 +1,4 @@
-CREATE TABLE user_details (
+CREATE TABLE user_detail (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     first_name VARCHAR(255) NOT NULL,
     last_name VARCHAR(255) NOT NULL,
@@ -7,4 +7,4 @@ CREATE TABLE user_details (
     first_guardian_user_id VARCHAR(15) NULL,
     second_guardian_user_id VARCHAR(15) NULL
 );
-CREATE INDEX idx_user_details_id ON user_details(id);
+CREATE INDEX idx_user_detail_id ON user_detail(id);

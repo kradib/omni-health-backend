@@ -1,7 +1,11 @@
 package com.example.omni_health_app.controller;
 
 import com.example.omni_health_app.dto.request.CreateAppointmentRequest;
-import com.example.omni_health_app.dto.response.*;
+import com.example.omni_health_app.dto.response.CreateAppointmentResponse;
+import com.example.omni_health_app.dto.response.CreateAppointmentResponseData;
+import com.example.omni_health_app.dto.response.ResponseMetadata;
+import com.example.omni_health_app.dto.response.ResponseWrapper;
+import com.example.omni_health_app.exception.BadRequestException;
 import com.example.omni_health_app.service.UserAppointmentScheduleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,7 +26,8 @@ public class UserAppointmentScheduleController {
 
 
     @PostMapping
-    public ResponseEntity<ResponseWrapper<CreateAppointmentResponseData>> createAppointmentSchedule(@RequestBody CreateAppointmentRequest createAppointmentRequest) {
+    public ResponseEntity<ResponseWrapper<CreateAppointmentResponseData>> createAppointmentSchedule
+            (@RequestBody CreateAppointmentRequest createAppointmentRequest) throws BadRequestException {
         log.info("Receive appointment schedule request {}", createAppointmentRequest);
 
         final ResponseWrapper<CreateAppointmentResponseData> responseWrapper = CreateAppointmentResponse.builder()

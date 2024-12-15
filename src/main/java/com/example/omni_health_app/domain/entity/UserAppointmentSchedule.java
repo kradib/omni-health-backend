@@ -19,7 +19,7 @@ public class UserAppointmentSchedule {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String username;
 
     @Column(nullable = false)
@@ -31,13 +31,10 @@ public class UserAppointmentSchedule {
     @Column(nullable = false, length = 100)
     private String doctorName;
 
-    @Column(unique = true)
-    private Long userDetailsId;
-
-    @Column
+    @Column(nullable = false)
     private Integer status;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "user_details_id", referencedColumnName = "id")
-    private UserDetails userDetails;
+    @JoinColumn(name = "user_detail_id", referencedColumnName = "id")
+    private UserDetail userDetail;
 }

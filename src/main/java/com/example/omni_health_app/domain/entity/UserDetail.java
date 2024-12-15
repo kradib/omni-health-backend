@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class UserDetails {
+public class UserDetail {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,6 +24,6 @@ public class UserDetails {
     private String firstGuardianUserId;
     private String secondGuardianUserId;
 
-    @OneToOne(mappedBy = "userDetails")
+    @OneToOne(mappedBy = "userDetail")
     private UserAuth userAuth;
 }

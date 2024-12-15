@@ -1,7 +1,7 @@
 package com.example.omni_health_app.service;
 
 import com.example.omni_health_app.domain.entity.UserAuth;
-import com.example.omni_health_app.domain.entity.UserDetails;
+import com.example.omni_health_app.domain.entity.UserDetail;
 import com.example.omni_health_app.domain.repositories.UserAuthRepository;
 import com.example.omni_health_app.dto.request.UserSignInRequest;
 import com.example.omni_health_app.dto.request.UserSignUpRequest;
@@ -34,7 +34,7 @@ public class UserAuthService {
         log.info("the validity of userid {} is {}, userId {} is {}",
                 request.getFirstGuardianUserId(), validFirstGuardianUserId, request.getSecondGuardianUserId(), validSecondGuardianUserId);
 
-        final UserDetails userDetails = UserDetails.builder()
+        final UserDetail userDetail = UserDetail.builder()
                 .email(request.getEmailId())
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
@@ -44,13 +44,13 @@ public class UserAuthService {
                 .build();
 
         final UserAuth userAuth = UserAuth.builder()
-                .userDetails(userDetails)
+                .userDetail(userDetail)
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .build();
 
         UserAuth savedUser = userAuthRepository.save(userAuth);
-        log.info("Successfully registered user {}", savedUser.getUserDetails());
+        log.info("Successfully registered user {}", savedUser.getUserDetail());
         return userAuth.getUsername();
     }
 

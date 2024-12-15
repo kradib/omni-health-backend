@@ -25,7 +25,7 @@ public class UserAuth {
     private String password;
 
     @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "user_details_id", referencedColumnName = "id")
-    private UserDetails userDetails;
+    @JoinColumn(name = "user_detail_id", referencedColumnName = "id")
+    private UserDetail userDetail;
 
 }

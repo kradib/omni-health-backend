@@ -13,5 +13,4 @@ public class CreateAppointmentRequest {
     private LocalDateTime appointmentDateTime;
     private String appointmentPlace;
     private String doctorName;
-    private Long userDetailsId;
 }
