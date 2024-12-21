@@ -3,15 +3,29 @@ package com.example.omni_health_app.controller;
 import com.example.omni_health_app.dto.request.CancelAppointmentRequest;
 import com.example.omni_health_app.dto.request.CreateAppointmentRequest;
 import com.example.omni_health_app.dto.request.UpdateAppointmentRequest;
-import com.example.omni_health_app.dto.response.*;
+import com.example.omni_health_app.dto.response.CancelAppointmentResponse;
+import com.example.omni_health_app.dto.response.CancelAppointmentResponseData;
+import com.example.omni_health_app.dto.response.CreateAppointmentResponse;
+import com.example.omni_health_app.dto.response.CreateAppointmentResponseData;
+import com.example.omni_health_app.dto.response.GetAllAppointmentResponse;
+import com.example.omni_health_app.dto.response.GetAllAppointmentResponseData;
+import com.example.omni_health_app.dto.response.GetAppointmentResponse;
+import com.example.omni_health_app.dto.response.GetAppointmentResponseData;
+import com.example.omni_health_app.dto.response.ResponseMetadata;
+import com.example.omni_health_app.dto.response.ResponseWrapper;
+import com.example.omni_health_app.dto.response.UpdateAppointmentResponse;
+import com.example.omni_health_app.dto.response.UpdateAppointmentResponseData;
 import com.example.omni_health_app.exception.BadRequestException;
 import com.example.omni_health_app.service.UserAppointmentScheduleService;
-import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+
+import static com.example.omni_health_app.util.UserNameUtil.getCurrentUsername;
 
 @RestController
 @RequiredArgsConstructor
@@ -25,10 +39,11 @@ public class UserAppointmentScheduleController {
     @PostMapping
     public ResponseEntity<ResponseWrapper<CreateAppointmentResponseData>> createAppointmentSchedule
             (@RequestBody CreateAppointmentRequest createAppointmentRequest) throws BadRequestException {
-        log.info("Receive appointment schedule request {}", createAppointmentRequest);
+        final String userName = getCurrentUsername();
+        log.info("Receive appointment schedule request {} for {}", createAppointmentRequest, userName);
 
         final ResponseWrapper<CreateAppointmentResponseData> responseWrapper = CreateAppointmentResponse.builder()
-                .data(userAppointmentScheduleService.createAppointmentSchedule(createAppointmentRequest))
+                .data(userAppointmentScheduleService.createAppointmentSchedule(userName, createAppointmentRequest))
                 .responseMetadata(ResponseMetadata.builder()
                         .statusCode(HttpStatus.OK.value())
                         .errorCode(0)
@@ -41,10 +56,11 @@ public class UserAppointmentScheduleController {
     @DeleteMapping
     public ResponseEntity<ResponseWrapper<CancelAppointmentResponseData>> cancelAppointmentSchedule
             (@RequestBody CancelAppointmentRequest cancelAppointmentRequest) throws BadRequestException {
-        log.info("Receive appointment cancel request {}", cancelAppointmentRequest);
+        final String userName = getCurrentUsername();
+        log.info("Receive appointment cancel request {} for {}", cancelAppointmentRequest, userName);
 
         final ResponseWrapper<CancelAppointmentResponseData> responseWrapper = CancelAppointmentResponse.builder()
-                .data(userAppointmentScheduleService.cancelAppointmentSchedule(cancelAppointmentRequest))
+                .data(userAppointmentScheduleService.cancelAppointmentSchedule(userName, cancelAppointmentRequest))
                 .responseMetadata(ResponseMetadata.builder()
                         .statusCode(HttpStatus.OK.value())
                         .errorCode(0)
@@ -55,14 +71,17 @@ public class UserAppointmentScheduleController {
     }
 
 
-    @PatchMapping
+    @PatchMapping("/{appointmentId}")
     public ResponseEntity<ResponseWrapper<UpdateAppointmentResponseData>> updateAppointmentSchedule(
-            @PathParam("appointmentId") Long appointmentId,
+            @PathVariable("appointmentId") Long appointmentId,
             @RequestBody UpdateAppointmentRequest updateAppointmentRequest) throws BadRequestException {
-        log.info("Receive appointment update request {}", updateAppointmentRequest);
+        final String userName = getCurrentUsername();
+        log.info("Receive appointment update request {} for {} on {}", updateAppointmentRequest, userName,
+                appointmentId);
 
         final ResponseWrapper<UpdateAppointmentResponseData> responseWrapper = UpdateAppointmentResponse.builder()
-                .data(userAppointmentScheduleService.updateAppointmentSchedule(appointmentId, updateAppointmentRequest))
+                .data(userAppointmentScheduleService.updateAppointmentSchedule(userName, appointmentId,
+                        updateAppointmentRequest))
                 .responseMetadata(ResponseMetadata.builder()
                         .statusCode(HttpStatus.OK.value())
                         .errorCode(0)
@@ -71,4 +90,42 @@ public class UserAppointmentScheduleController {
         return ResponseEntity.ok(responseWrapper);
 
     }
+
+
+    @GetMapping
+    public ResponseEntity<ResponseWrapper<GetAllAppointmentResponseData>> getAllAppointmentSchedule(
+            @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate) throws BadRequestException {
+        final String userName = getCurrentUsername();
+        log.info("Receive get all appointments from {} to {} for {}", startDate, endDate, userName);
+
+        final ResponseWrapper<GetAllAppointmentResponseData> responseWrapper = GetAllAppointmentResponse.builder()
+                .data(userAppointmentScheduleService.getAllAppointmentSchedule(userName, LocalDateTime.parse(startDate),
+                        LocalDateTime.parse(endDate)))
+                .responseMetadata(ResponseMetadata.builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .errorCode(0)
+                        .build())
+                .build();
+        return ResponseEntity.ok(responseWrapper);
+
+    }
+
+    @GetMapping("/{appointmentId}")
+    public ResponseEntity<ResponseWrapper<GetAppointmentResponseData>> getAppointmentSchedule(
+            @PathVariable("appointmentId") Long appointmentId) throws BadRequestException {
+        final String userName = getCurrentUsername();
+        log.info("Receive get appointment request with id {} for {}", appointmentId, userName);
+
+        final ResponseWrapper<GetAppointmentResponseData> responseWrapper = GetAppointmentResponse.builder()
+                .data(userAppointmentScheduleService.getAppointmentSchedule(userName, appointmentId))
+                .responseMetadata(ResponseMetadata.builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .errorCode(0)
+                        .build())
+                .build();
+        return ResponseEntity.ok(responseWrapper);
+
+    }
+
 }

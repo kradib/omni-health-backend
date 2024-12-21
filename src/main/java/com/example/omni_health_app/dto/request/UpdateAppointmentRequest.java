@@ -8,8 +8,6 @@ import java.time.LocalDateTime;
 @Data
 @Builder
 public class UpdateAppointmentRequest {
-
-    private String username;
     private LocalDateTime appointmentDateTime;
     private String appointmentPlace;
     private String doctorName;
