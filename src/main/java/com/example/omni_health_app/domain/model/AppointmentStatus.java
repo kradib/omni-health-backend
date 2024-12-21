@@ -6,7 +6,8 @@ import java.util.stream.Collectors;
 
 public enum AppointmentStatus {
     CREATED(1),
-    CANCELLED(2);
+    CANCELLED(2),
+    UPDATED(3);
 
     private final int status;
 

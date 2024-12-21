@@ -2,9 +2,11 @@ package com.example.omni_health_app.controller;
 
 import com.example.omni_health_app.dto.request.CancelAppointmentRequest;
 import com.example.omni_health_app.dto.request.CreateAppointmentRequest;
+import com.example.omni_health_app.dto.request.UpdateAppointmentRequest;
 import com.example.omni_health_app.dto.response.*;
 import com.example.omni_health_app.exception.BadRequestException;
 import com.example.omni_health_app.service.UserAppointmentScheduleService;
+import jakarta.websocket.server.PathParam;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -43,6 +45,24 @@ public class UserAppointmentScheduleController {
 
         final ResponseWrapper<CancelAppointmentResponseData> responseWrapper = CancelAppointmentResponse.builder()
                 .data(userAppointmentScheduleService.cancelAppointmentSchedule(cancelAppointmentRequest))
+                .responseMetadata(ResponseMetadata.builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .errorCode(0)
+                        .build())
+                .build();
+        return ResponseEntity.ok(responseWrapper);
+
+    }
+
+
+    @PatchMapping
+    public ResponseEntity<ResponseWrapper<UpdateAppointmentResponseData>> updateAppointmentSchedule(
+            @PathParam("appointmentId") Long appointmentId,
+            @RequestBody UpdateAppointmentRequest updateAppointmentRequest) throws BadRequestException {
+        log.info("Receive appointment update request {}", updateAppointmentRequest);
+
+        final ResponseWrapper<UpdateAppointmentResponseData> responseWrapper = UpdateAppointmentResponse.builder()
+                .data(userAppointmentScheduleService.updateAppointmentSchedule(appointmentId, updateAppointmentRequest))
                 .responseMetadata(ResponseMetadata.builder()
                         .statusCode(HttpStatus.OK.value())
                         .errorCode(0)

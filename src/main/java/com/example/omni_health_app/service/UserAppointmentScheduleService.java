@@ -7,8 +7,10 @@ import com.example.omni_health_app.domain.repositories.UserAppointmentScheduleRe
 import com.example.omni_health_app.domain.repositories.UserAuthRepository;
 import com.example.omni_health_app.dto.request.CancelAppointmentRequest;
 import com.example.omni_health_app.dto.request.CreateAppointmentRequest;
+import com.example.omni_health_app.dto.request.UpdateAppointmentRequest;
 import com.example.omni_health_app.dto.response.CancelAppointmentResponseData;
 import com.example.omni_health_app.dto.response.CreateAppointmentResponseData;
+import com.example.omni_health_app.dto.response.UpdateAppointmentResponseData;
 import com.example.omni_health_app.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -63,6 +65,33 @@ public class UserAppointmentScheduleService {
         return CancelAppointmentResponseData.builder()
                 .success(true)
                 .appointmentId(dto.getAppointmentId())
+                .build();
+    }
+
+    public UpdateAppointmentResponseData updateAppointmentSchedule(
+            Long appointmentId, UpdateAppointmentRequest dto) throws BadRequestException {
+        final Optional<UserAuth> userAuthOptional = userAuthRepository.findByUsername(dto.getUsername());
+        if(userAuthOptional.isEmpty()) {
+            throw new BadRequestException(String.format("user %s does not exists", dto.getUsername()));
+        }
+        final Optional<UserAppointmentSchedule> userAppointmentScheduleOptional = userAppointmentScheduleRepository.findById(appointmentId);
+        if(userAppointmentScheduleOptional.isEmpty()) {
+            throw new BadRequestException(String.format("AppointId %s for user %s does not exists", appointmentId, dto.getUsername()));
+        }
+        final UserAppointmentSchedule userAppointmentSchedule = userAppointmentScheduleOptional.get();
+        if(!userAppointmentSchedule.getUsername().equals(dto.getUsername())) {
+            throw new BadRequestException(String.format("AppointId %s does not belong to this user %s ",appointmentId, dto.getUsername()));
+        }
+        userAppointmentSchedule.setStatus(AppointmentStatus.UPDATED.getStatus());
+        userAppointmentSchedule.setAppointmentPlace(dto.getAppointmentPlace());
+        userAppointmentSchedule.setAppointmentDateTime(dto.getAppointmentDateTime());
+        userAppointmentSchedule.setDoctorName(dto.getDoctorName());
+        final UserAppointmentSchedule updatedUserAppointmentSchedule = userAppointmentScheduleRepository.save(userAppointmentSchedule);
+        return UpdateAppointmentResponseData.builder()
+                .success(true)
+                .appointmentTime(updatedUserAppointmentSchedule.getAppointmentDateTime())
+                .userName(updatedUserAppointmentSchedule.getUsername())
+                .doctorName(updatedUserAppointmentSchedule.getDoctorName())
                 .build();
     }
 
