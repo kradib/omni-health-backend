@@ -1,6 +1,7 @@
 package com.example.omni_health_app.domain.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -26,6 +27,7 @@ public class UserAuth {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_detail_id", referencedColumnName = "id")
+    @JsonManagedReference
     private UserDetail userDetail;
 
 }
