@@ -14,6 +14,18 @@ spring:
   devtools:
     livereload:
       enabled: true
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: <<your email>> # your email
+    password: <<password>> #your email app passowrd
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
 #auth
 omni:
   auth:

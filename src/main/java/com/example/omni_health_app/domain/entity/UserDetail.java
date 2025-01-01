@@ -2,10 +2,7 @@ package com.example.omni_health_app.domain.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
 @Data
@@ -27,5 +24,6 @@ public class UserDetail {
 
     @OneToOne(mappedBy = "userDetail")
     @JsonBackReference
+    @ToString.Exclude
     private UserAuth userAuth;
 }

@@ -1,7 +1,6 @@
 package com.example.omni_health_app.domain.repositories;
 
 import com.example.omni_health_app.domain.entity.UserAppointmentSchedule;
-import com.example.omni_health_app.domain.entity.UserAuth;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -29,5 +28,9 @@ public interface UserAppointmentScheduleRepository extends JpaRepository<UserApp
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate
     );
+
+    @Query("SELECT u FROM UserAppointmentSchedule u WHERE u.status != 2 AND u.appointmentDateTime BETWEEN :startDateTime AND :endDateTime")
+    List<UserAppointmentSchedule> findPendingAppointments(LocalDateTime startDateTime, LocalDateTime endDateTime);
+
 
 }

@@ -81,6 +81,7 @@ public class UserAppointmentScheduleController {
     }
 
 
+    //TODO: paginate this end point
     @GetMapping
     public ResponseEntity<ResponseWrapper<GetAllAppointmentResponseData>> getAllAppointmentSchedule(
             @RequestParam("startDate") String startDate,
