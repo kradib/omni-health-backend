@@ -51,23 +51,121 @@ public class AppointmentReminderService {
 
     private String buildUserEmailContent(UserAppointmentSchedule appointment) {
         return String.format(
-                "Dear %s,\n\nYou have an upcoming appointment with Dr. %s at %s, scheduled on %s.\n\nLocation: %s\n\nBest regards,\nOmni Health App Team",
+                """
+                <html>
+                <head>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            line-height: 1.6;
+                            color: #333333;
+                        }
+                        .header {
+                            background-color: #4CAF50;
+                            color: white;
+                            padding: 10px 20px;
+                            text-align: center;
+                            font-size: 24px;
+                        }
+                        .content {
+                            padding: 20px;
+                        }
+                        .footer {
+                            margin-top: 20px;
+                            text-align: center;
+                            font-size: 14px;
+                            color: #777777;
+                        }
+                        .details {
+                            margin: 10px 0;
+                            padding: 10px;
+                            background-color: #f9f9f9;
+                            border: 1px solid #dddddd;
+                            border-radius: 5px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">Appointment Reminder</div>
+                    <div class="content">
+                        <p>Dear <strong>%s</strong>,</p>
+                        <p>You have an upcoming appointment with <strong> %s</strong>.</p>
+                        <div class="details">
+                            <p><strong>Date:</strong> %s</p>
+                            <p><strong>Time:</strong> %s</p>
+                            <p><strong>Location:</strong> %s</p>
+                        </div>
+                        <p>We look forward to seeing you fit soon!</p>
+                    </div>
+                    <div class="footer">Best regards,<br>Omni Health App Team</div>
+                </body>
+                </html>
+                """,
                 appointment.getUsername(),
                 appointment.getDoctorName(),
-                appointment.getAppointmentDateTime().toLocalTime(),
                 appointment.getAppointmentDateTime().toLocalDate(),
+                appointment.getAppointmentDateTime().toLocalTime(),
                 appointment.getAppointmentPlace()
         );
     }
 
     private String buildGuardianEmailContent(UserAppointmentSchedule appointment, String guardianName) {
         return String.format(
-                "Dear %s,\n\nThe user %s has an upcoming appointment with Dr. %s at %s, scheduled on %s.\n\nLocation: %s\n\nBest regards,\nOmni Health App Team",
+                """
+                <html>
+                <head>
+                    <style>
+                        body {
+                            font-family: Arial, sans-serif;
+                            line-height: 1.6;
+                            color: #333333;
+                        }
+                        .header {
+                            background-color: #4CAF50;
+                            color: white;
+                            padding: 10px 20px;
+                            text-align: center;
+                            font-size: 24px;
+                        }
+                        .content {
+                            padding: 20px;
+                        }
+                        .footer {
+                            margin-top: 20px;
+                            text-align: center;
+                            font-size: 14px;
+                            color: #777777;
+                        }
+                        .details {
+                            margin: 10px 0;
+                            padding: 10px;
+                            background-color: #f9f9f9;
+                            border: 1px solid #dddddd;
+                            border-radius: 5px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="header">Appointment Reminder</div>
+                    <div class="content">
+                        <p>Dear <strong>%s</strong>,</p>
+                        <p>The user <strong>%s</strong> has an upcoming appointment with <strong> %s</strong>.</p>
+                        <div class="details">
+                            <p><strong>Date:</strong> %s</p>
+                            <p><strong>Time:</strong> %s</p>
+                            <p><strong>Location:</strong> %s</p>
+                        </div>
+                        <p>We look forward to seeing your dependent fit soon!</p>
+                    </div>
+                    <div class="footer">Best regards,<br>Omni Health App Team</div>
+                </body>
+                </html>
+                """,
                 guardianName,
                 appointment.getUsername(),
                 appointment.getDoctorName(),
-                appointment.getAppointmentDateTime().toLocalTime(),
                 appointment.getAppointmentDateTime().toLocalDate(),
+                appointment.getAppointmentDateTime().toLocalTime(),
                 appointment.getAppointmentPlace()
         );
     }
