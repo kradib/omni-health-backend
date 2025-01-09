@@ -1,6 +1,8 @@
 package com.example.omni_health_app.controller;
 
 
+import com.example.omni_health_app.dto.request.ForgotPasswordRequest;
+import com.example.omni_health_app.dto.request.ResetPasswordRequest;
 import com.example.omni_health_app.dto.request.UserSignInRequest;
 import com.example.omni_health_app.dto.request.UserSignUpRequest;
 import com.example.omni_health_app.dto.response.*;
@@ -55,6 +57,41 @@ public class UserController {
         return ResponseEntity.ok(responseWrapper);
     }
 
+    @PostMapping("/forget-password")
+    public ResponseEntity<ResponseWrapper<ForgotPasswordResponseData>> forgotPassword(@RequestBody @NonNull ForgotPasswordRequest request) {
+        log.info("Received user forget password request for username: {}", request.getUserName());
+        userAuthService.processForgotPassword(request.getUserName());
+        final ResponseWrapper<ForgotPasswordResponseData> responseWrapper = ForgotPasswordResponse.builder()
+                .data(ForgotPasswordResponseData.builder()
+                        .userName(request.getUserName())
+                        .success(true)
+                        .build())
+                .responseMetadata(ResponseMetadata.builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .errorCode(0)
+                        .build())
+                .build();
+        return ResponseEntity.ok(responseWrapper);
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<ResponseWrapper<ResetPasswordResponseData>> resetPassword(@RequestBody @NonNull ResetPasswordRequest request) throws UserAuthException {
+        boolean isValidToken = userAuthService.validateResetToken(request.getToken());
+        if (!isValidToken) {
+            throw new UserAuthException("Invalid or expired token.");
+        }
+        userAuthService.resetPassword(request.getToken(), request.getNewPassword());
+        final ResponseWrapper<ResetPasswordResponseData> responseWrapper = ResetPasswordResponse.builder()
+                .data(ResetPasswordResponseData.builder()
+                        .success(true)
+                        .build())
+                .responseMetadata(ResponseMetadata.builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .errorCode(0)
+                        .build())
+                .build();
+        return ResponseEntity.ok(responseWrapper);
+    }
 
 
 

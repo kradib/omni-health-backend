@@ -9,8 +9,15 @@ import com.example.omni_health_app.exception.UserAuthException;
 import com.example.omni_health_app.util.TokenUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.Cache;
+import org.springframework.cache.CacheManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+import java.util.UUID;
+
+import static com.example.omni_health_app.util.Constants.CACHE_NAME;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +30,8 @@ public class UserAuthService {
     private final PasswordEncoder passwordEncoder;
 
     private final TokenUtil tokenUtil;
+    private final CacheManager cacheManager;
+    private final INotificationService notificationService;
 
     public String signUp(UserSignUpRequest request) throws UserAuthException {
         if (userAuthRepository.existsByUsername(request.getUsername())) {
@@ -65,4 +74,41 @@ public class UserAuthService {
 
         return tokenUtil.generateToken(userAuth.getUsername());
     }
+
+    public void processForgotPassword(String userName) {
+        Optional<UserAuth> userOptional = userAuthRepository.findByUsername(userName);
+        if (userOptional.isPresent()) {
+            UserAuth userAuth = userOptional.get();
+            String resetToken = UUID.randomUUID().toString();
+            Cache cache = cacheManager.getCache(CACHE_NAME);
+            cache.put(resetToken, userAuth.getUsername());
+            notificationService.sendNotification(userAuth.getUserDetail().getEmail(), "Password Reset Request",
+                    "Use this code to reset your password: " + resetToken);
+        }
+    }
+
+    public boolean validateResetToken(String token) {
+        Cache cache = cacheManager.getCache(CACHE_NAME);
+        String userName = cache.get(token, String.class);
+        return userName != null;
+    }
+
+    public void resetPassword(String token, String newPassword) throws UserAuthException {
+        Cache cache = cacheManager.getCache(CACHE_NAME);
+        String userName = cache.get(token, String.class);
+        if (userName != null) {
+            Optional<UserAuth> userOptional = userAuthRepository.findByUsername(userName);
+            if (userOptional.isPresent()) {
+                UserAuth userAuth = userOptional.get();
+                userAuth.setPassword(passwordEncoder.encode(newPassword)); // Hash password before saving
+                userAuthRepository.save(userAuth);
+                cache.evict(token);
+            } else {
+                throw new UserAuthException("Invalid token");
+            }
+        }
+    }
+
+
+
 }
