@@ -1,6 +1,8 @@
 package com.example.omni_health_app.domain.repositories;
 
 import com.example.omni_health_app.domain.entity.UserAppointmentSchedule;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -23,10 +25,11 @@ public interface UserAppointmentScheduleRepository extends JpaRepository<UserApp
             "       OR d.firstGuardianUserId = :username " +
             "       OR d.secondGuardianUserId = :username) " +
             "AND u.appointmentDateTime BETWEEN :startDate AND :endDate")
-    List<UserAppointmentSchedule> findAppointmentsByUserAndDateRange(
+    Page<UserAppointmentSchedule> findAppointmentsByUserAndDateRange(
             @Param("username") String username,
             @Param("startDate") LocalDateTime startDate,
-            @Param("endDate") LocalDateTime endDate
+            @Param("endDate") LocalDateTime endDate,
+            Pageable pageable
     );
 
     @Query("SELECT u FROM UserAppointmentSchedule u WHERE u.status != 2 AND u.appointmentDateTime BETWEEN :startDateTime AND :endDateTime")

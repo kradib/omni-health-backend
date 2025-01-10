@@ -8,6 +8,8 @@ import com.example.omni_health_app.exception.BadRequestException;
 import com.example.omni_health_app.service.UserAppointmentScheduleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -81,17 +83,18 @@ public class UserAppointmentScheduleController {
     }
 
 
-    //TODO: paginate this end point
     @GetMapping
     public ResponseEntity<ResponseWrapper<GetAllAppointmentResponseData>> getAllAppointmentSchedule(
             @RequestParam("startDate") String startDate,
-            @RequestParam("endDate") String endDate) throws BadRequestException {
+            @RequestParam("endDate") String endDate,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) throws BadRequestException {
         final String userName = getCurrentUsername();
         log.info("Receive get all appointments from {} to {} for {}", startDate, endDate, userName);
-
+        final Pageable pageable = PageRequest.of(page, size);
         final ResponseWrapper<GetAllAppointmentResponseData> responseWrapper = GetAllAppointmentResponse.builder()
-                .data(userAppointmentScheduleService.getAllAppointmentSchedule(userName, LocalDateTime.parse(startDate),
-                        LocalDateTime.parse(endDate)))
+                .data(userAppointmentScheduleService.getAllAppointmentSchedule(userName,
+                        LocalDateTime.parse(startDate), LocalDateTime.parse(endDate), pageable))
                 .responseMetadata(ResponseMetadata.builder()
                         .statusCode(HttpStatus.OK.value())
                         .errorCode(0)

@@ -9,13 +9,11 @@ import com.example.omni_health_app.domain.repositories.UserAuthRepository;
 import com.example.omni_health_app.dto.request.CancelAppointmentRequest;
 import com.example.omni_health_app.dto.request.CreateAppointmentRequest;
 import com.example.omni_health_app.dto.request.UpdateAppointmentRequest;
-import com.example.omni_health_app.dto.response.CancelAppointmentResponseData;
-import com.example.omni_health_app.dto.response.CreateAppointmentResponseData;
-import com.example.omni_health_app.dto.response.GetAllAppointmentResponseData;
-import com.example.omni_health_app.dto.response.GetAppointmentResponseData;
-import com.example.omni_health_app.dto.response.UpdateAppointmentResponseData;
+import com.example.omni_health_app.dto.response.*;
 import com.example.omni_health_app.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -103,35 +101,44 @@ public class UserAppointmentScheduleService {
     }
 
 
-    public GetAllAppointmentResponseData getAllAppointmentSchedule(final String userName, final LocalDateTime startDate, final LocalDateTime endDate) throws BadRequestException {
+    public GetAllAppointmentResponseData getAllAppointmentSchedule(
+            final String userName,
+            final LocalDateTime startDate,
+            final LocalDateTime endDate,
+            final Pageable pageable) throws BadRequestException {
         final Optional<UserAuth> userAuthOptional = userAuthRepository.findByUsername(userName);
-        if(userAuthOptional.isEmpty()) {
-            throw new BadRequestException(String.format("user %s does not exists", userName));
-        }
-        final List<UserAppointmentSchedule> userAppointmentSchedules =
-                userAppointmentScheduleRepository.findAppointmentsByUserAndDateRange(userName, startDate, endDate);
-        if(userAppointmentSchedules.isEmpty()) {
-            throw new BadRequestException(String.format("Appointment for user %s does not exists", userName));
+        if (userAuthOptional.isEmpty()) {
+            throw new BadRequestException(String.format("User %s does not exist", userName));
         }
 
-        final List<UserAppointmentSchedule> ownAppointments = userAppointmentSchedules.stream()
+        final Page<UserAppointmentSchedule> userAppointmentSchedulesPage =
+                userAppointmentScheduleRepository.findAppointmentsByUserAndDateRange(userName, startDate, endDate, pageable);
+
+        if (userAppointmentSchedulesPage.isEmpty()) {
+            throw new BadRequestException(String.format("No appointments found for user %s", userName));
+        }
+
+        final List<UserAppointmentSchedule> ownAppointments = userAppointmentSchedulesPage.stream()
                 .filter(appointment -> appointment.getUsername().equals(userName))
                 .toList();
 
-        Map<String, List<UserAppointmentSchedule>> dependentAppointments = userAppointmentSchedules.stream()
+        Map<String, List<UserAppointmentSchedule>> dependentAppointments = userAppointmentSchedulesPage.stream()
                 .filter(appointment -> {
                     UserDetail userDetail = appointment.getUserDetail();
-                    return userName.equals(userDetail.getFirstGuardianUserId()) ||  userName.equals(userDetail.getSecondGuardianUserId());
+                    return userName.equals(userDetail.getFirstGuardianUserId()) || userName.equals(userDetail.getSecondGuardianUserId());
                 })
                 .collect(Collectors.groupingBy(appointment -> {
                     UserDetail userDetail = appointment.getUserDetail();
-                    return  userDetail.getFirstName() + " " + userDetail.getLastName();
+                    return userDetail.getFirstName() + " " + userDetail.getLastName();
                 }));
 
         return GetAllAppointmentResponseData.builder()
                 .success(true)
                 .ownAppointments(ownAppointments)
                 .dependentAppointments(dependentAppointments)
+                .totalPages(userAppointmentSchedulesPage.getTotalPages())
+                .totalElements(userAppointmentSchedulesPage.getTotalElements())
+                .currentPage(userAppointmentSchedulesPage.getNumber())
                 .build();
     }
 

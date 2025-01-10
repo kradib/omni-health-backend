@@ -8,7 +8,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 
@@ -21,4 +20,7 @@ public class GetAllAppointmentResponseData {
     private boolean success;
     private List<UserAppointmentSchedule> ownAppointments;
     private Map<String, List<UserAppointmentSchedule>> dependentAppointments;
+    private int totalPages;
+    private long totalElements;
+    private int currentPage;
 }
