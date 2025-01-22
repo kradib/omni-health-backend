@@ -106,6 +106,8 @@ public class UserAuthService {
             } else {
                 throw new UserAuthException("Invalid token");
             }
+        } else {
+            throw new UserAuthException("Token does not exist");
         }
     }
 
