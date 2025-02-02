@@ -29,5 +29,10 @@ spring:
 #auth
 omni:
   auth:
-    secret: YSb7nYZBoEOfNvVVhKM2vd2WaO9pEUOwHISWiPt/itkWEB599BrDnCLBWt0C/xPg11y2Spa9T8SgSlSUDHUaSQ== #64 character secret key
+    secret: #64 character secret key
     expiration: 43200000 #12 hours in milliseconds
+
+aws:
+  s3:
+    bucket-name: test-reports
+  region: us-east-1
