@@ -29,10 +29,11 @@ spring:
 #auth
 omni:
   auth:
-    secret: #64 character secret key
+    secret: #128 char secret
     expiration: 43200000 #12 hours in milliseconds
 
 aws:
   s3:
-    bucket-name: test-reports
-  region: us-east-1
+    bucket-name: ${S3_BUCKET_NAME:omni-health-bucket}
+  region: ${AWS_REGION:us-east-1}
+  endpoint: ${AWS_ENDPOINT_URL:http://localhost:4566}

@@ -10,9 +10,30 @@ services:
     depends_on:
       # shellcheck disable=SC2215
       - db
+      - localstack
+    environment:
+      AWS_ACCESS_KEY_ID: test
+      AWS_SECRET_ACCESS_KEY: test
+      AWS_REGION: us-east-1
+      AWS_ENDPOINT_URL: http://localstack:4566
+      S3_BUCKET_NAME: omni-health-bucket
 
   db:
     image: mysql:latest
     environment:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: omni-health
+
+  localstack:
+    image: localstack/localstack
+    ports:
+      - "4566:4566"  # LocalStack S3 port
+    environment:
+      - SERVICES=s3
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+      - AWS_DEFAULT_REGION=us-east-1
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./localstack-init.sh:/etc/localstack/init/ready.d/init.sh"
+
