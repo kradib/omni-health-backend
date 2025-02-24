@@ -2,14 +2,15 @@ spring:
   application:
     name: omni-health-app
   datasource:
-    url: jdbc:mysql://localhost:3306/omni-health
+    url: jdbc:mysql://localhost:3306/omni_health
     username: root
-    password: root
+    password:
     driver-class-name: com.mysql.cj.jdbc.Driver
   # Flyway configuration
   flyway:
     enabled: true
     locations: classpath:db/migration
+    baseline-on-migrate: true
   #dev-tool
   devtools:
     livereload:
@@ -29,7 +30,7 @@ spring:
 #auth
 omni:
   auth:
-    secret: #128 char secret
+    secret: DqY69Wv3kGxI5aM4eXJxW65ZNMnU8rM62d/HZOm6T6tcTTB9ZUE3qvCefrKvzo3fF6DCR1Ip1au1OxB1PkQXJQ== #128 char secret
     expiration: 43200000 #12 hours in milliseconds
 
 aws:

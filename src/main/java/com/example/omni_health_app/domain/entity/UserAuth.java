@@ -24,10 +24,18 @@ public class UserAuth {
 
     @Column(nullable = false)
     private String password;
+    private String roles;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_detail_id", referencedColumnName = "id")
     @JsonManagedReference
     private UserDetail userDetail;
+
+    public static class UserAuthBuilder {
+        public UserAuthBuilder roles(String roles) {
+            this.roles = roles;
+            return this;
+        }
+    }
 
 }
