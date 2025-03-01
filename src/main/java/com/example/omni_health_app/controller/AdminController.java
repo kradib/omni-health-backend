@@ -35,8 +35,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.security.access.prepost.PreAuthorize;
 
 
-
-
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/admin")
@@ -48,7 +46,7 @@ public class AdminController {
 
 
     @PostMapping("/addUser")
-    @PreAuthorize("hasRole('ADMIN')") 
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ResponseWrapper<AddUserResponseData>> signUp(@RequestBody @NonNull AddUserRequest request) throws UserAuthException {
         log.info("Receive add userrequest {}", request);
         final ResponseWrapper<AddUserResponseData> responseWrapper = AddUserResponse.builder()
@@ -115,7 +113,7 @@ public class AdminController {
         return ResponseEntity.ok(responseWrapper);
     }
 
-     @PutMapping("/updateUser/{userId}")
+    @PutMapping("/updateUser/{userId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ResponseWrapper<AddUserResponseData>> updateUser(@PathVariable Long userId, @RequestBody UpdateUserRequest request) throws UserAuthException {
         log.info("Received update user request for userId {}: {}", userId, request);
@@ -136,60 +134,59 @@ public class AdminController {
     public ResponseEntity<ResponseWrapper<Void>> deleteUser(@PathVariable Long userId) throws UserAuthException {
         log.info("Received delete user request for userId {}", userId);
         adminService.deleteUser(userId);
-        
+
         ResponseWrapper<Void> responseWrapper = new ResponseWrapper<>();
         ResponseMetadata responseMetadata = new ResponseMetadata();
         responseMetadata.setStatusCode(HttpStatus.OK.value());
         responseMetadata.setErrorCode(0);
-        
+
         // responseWrapper.ResponseMetadata(responseMetadata);
-    
+
         return ResponseEntity.ok(responseWrapper);
     }
 
     @GetMapping("/listUsers")
-        @PreAuthorize("hasRole('ADMIN')")
-        public ResponseEntity<ResponseWrapper<List<UserDetailWithRoles>>> listUsers(
-                @RequestParam(value = "role", required = false) String role) {
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ResponseWrapper<List<UserDetailWithRoles>>> listUsers(
+            @RequestParam(value = "role", required = false) String role) {
         log.info("Received user listing request with role filter: {}", role);
         List<UserDetailWithRoles> users = adminService.listUsers(role);
-        
+
         ResponseMetadata metadata = new ResponseMetadata("1234", null, HttpStatus.OK.value(), 0);
 
         ResponseWrapper<List<UserDetailWithRoles>> responseWrapper = new ResponseWrapper<>(users, metadata);
 
         return ResponseEntity.ok(responseWrapper);
-        }
+    }
 
-        @GetMapping("/appointments")
-        @PreAuthorize("hasRole('ADMIN')")
-        public ResponseEntity<ResponseWrapper<GetAllAppointmentResponseData>> getAllAppointmentSchedule(
-                @RequestParam(value = "startDate", required = false) String startDate,
-                @RequestParam(value = "endDate", required = false) String endDate,
-                @RequestParam(value = "doctor", required = false) String doctor,
-                @RequestParam(value = "page", defaultValue = "0") int page,
-                @RequestParam(value = "size", defaultValue = "10") int size) throws BadRequestException {
-        
-            log.info("Receive get all appointments from {} to {} for {}", startDate, endDate, doctor);
-        
-            final Pageable pageable = PageRequest.of(page, size);
-        
-        
+    @GetMapping("/appointments")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<ResponseWrapper<GetAllAppointmentResponseData>> getAllAppointmentSchedule(
+            @RequestParam(value = "startDate", required = false) String startDate,
+            @RequestParam(value = "endDate", required = false) String endDate,
+            @RequestParam(value = "doctor", required = false) String doctor,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) throws BadRequestException {
+
+        log.info("Receive get all appointments from {} to {} for {}", startDate, endDate, doctor);
+
+        final Pageable pageable = PageRequest.of(page, size);
+
+
         LocalDateTime startDateTime = (startDate != null && !startDate.isEmpty()) ? LocalDateTime.parse(startDate) : null;
         LocalDateTime endDateTime = (endDate != null && !endDate.isEmpty()) ? LocalDateTime.parse(endDate) : null;
 
-        
-            final ResponseWrapper<GetAllAppointmentResponseData> responseWrapper = GetAllAppointmentResponse.builder()
-                    .data(adminService.getAllAppointmentSchedule(doctor, startDateTime, endDateTime, pageable))
-                    .responseMetadata(ResponseMetadata.builder()
-                            .statusCode(HttpStatus.OK.value())
-                            .errorCode(0)
-                            .build())
-                    .build();
-        
-            return ResponseEntity.ok(responseWrapper);
-        }
-        
+
+        final ResponseWrapper<GetAllAppointmentResponseData> responseWrapper = GetAllAppointmentResponse.builder()
+                .data(adminService.getAllAppointmentSchedule(doctor, startDateTime, endDateTime, pageable))
+                .responseMetadata(ResponseMetadata.builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .errorCode(0)
+                        .build())
+                .build();
+
+        return ResponseEntity.ok(responseWrapper);
+    }
 
 
 }

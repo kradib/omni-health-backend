@@ -34,7 +34,6 @@ public class SecurityConfiguration {
                 .requestMatchers("/api/v1/user/signin").permitAll()
                 .requestMatchers("/api/v1/user/forget-password").permitAll()
                 .requestMatchers("/api/v1/user/reset-password").permitAll()
-                // Allow signup and signin
                 .anyRequest().authenticated() // Protect all other endpoints
                 .and()
                 .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)

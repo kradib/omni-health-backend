@@ -46,7 +46,7 @@ public class AdminService {
     private final CacheManager cacheManager;
     private final INotificationService notificationService;
 
-    public  UserDetail addUser(AddUserRequest request) throws UserAuthException {
+    public UserDetail addUser(AddUserRequest request) throws UserAuthException {
         if ("doctor".equalsIgnoreCase(request.getRoles())) {
             if (request.getMajor() == null || request.getMajor().trim().isEmpty()) {
                 throw new IllegalArgumentException("Major is required for Doctor role.");
@@ -83,54 +83,6 @@ public class AdminService {
         return savedUser.getUserDetail();
     }
 
-
-    public String signIn(UserSignInRequest request) throws UserAuthException {
-        UserAuth userAuth = userAuthRepository.findByUsername(request.getUsername())
-                .orElseThrow(() -> new UserAuthException("The User name does not exist"));
-
-        if (!passwordEncoder.matches(request.getPassword(), userAuth.getPassword())) {
-            throw new UserAuthException("Invalid pass word provided");
-        }
-
-        return tokenUtil.generateToken(userAuth.getUsername(),userAuth);
-    }
-
-    public void processForgotPassword(String userName) {
-        Optional<UserAuth> userOptional = userAuthRepository.findByUsername(userName);
-        if (userOptional.isPresent()) {
-            UserAuth userAuth = userOptional.get();
-            String resetToken = UUID.randomUUID().toString();
-            Cache cache = cacheManager.getCache(CACHE_NAME);
-            cache.put(resetToken, userAuth.getUsername());
-            notificationService.sendNotification(userAuth.getUserDetail().getEmail(), "Password Reset Request",
-                    "Use this code to reset your password: " + resetToken);
-        }
-    }
-
-    public boolean validateResetToken(String token) {
-        Cache cache = cacheManager.getCache(CACHE_NAME);
-        String userName = cache.get(token, String.class);
-        return userName != null;
-    }
-
-    public void resetPassword(String token, String newPassword) throws UserAuthException {
-        Cache cache = cacheManager.getCache(CACHE_NAME);
-        String userName = cache.get(token, String.class);
-        if (userName != null) {
-            Optional<UserAuth> userOptional = userAuthRepository.findByUsername(userName);
-            if (userOptional.isPresent()) {
-                UserAuth userAuth = userOptional.get();
-                userAuth.setPassword(passwordEncoder.encode(newPassword)); // Hash password before saving
-                userAuthRepository.save(userAuth);
-                cache.evict(token);
-            } else {
-                throw new UserAuthException("Invalid token");
-            }
-        } else {
-            throw new UserAuthException("Token does not exist");
-        }
-    }
-
     public UserDetail updateUser(Long userId, UpdateUserRequest request) throws UserAuthException {
         UserAuth existingUser = userAuthRepository.findById(userId)
                 .orElseThrow(() -> new UserAuthException("User not found"));
@@ -156,40 +108,40 @@ public class AdminService {
         log.info("Successfully deleted user with ID {}", userId);
     }
 
-   public List<UserDetailWithRoles> listUsers(String role) {
-    List<UserAuth> users;
+    public List<UserDetailWithRoles> listUsers(String role) {
+        List<UserAuth> users;
 
-    if (role != null && !role.isEmpty()) {
-        users = userAuthRepository.findByRolesContaining(role);
-    } else {
-        users = userAuthRepository.findAll();
-    }
+        if (role != null && !role.isEmpty()) {
+            users = userAuthRepository.findByRolesContaining(role);
+        } else {
+            users = userAuthRepository.findAll();
+        }
 
-    return users.stream()
-            .map(userAuth -> new UserDetailWithRoles(userAuth.getUserDetail(), userAuth.getRoles()))
-            .collect(Collectors.toList());
+        return users.stream()
+                .map(userAuth -> new UserDetailWithRoles(userAuth.getUserDetail(), userAuth.getRoles()))
+                .collect(Collectors.toList());
     }
 
     public GetAllAppointmentResponseData getAllAppointmentSchedule(
-        final String doctor,
-        final LocalDateTime startDate,
-        final LocalDateTime endDate,
-        final Pageable pageable) {
+            final String doctor,
+            final LocalDateTime startDate,
+            final LocalDateTime endDate,
+            final Pageable pageable) {
 
-    // Fetch appointments with optional date filters
-    final Page<UserAppointmentSchedule> userAppointmentSchedulesPage =
-            userAppointmentScheduleRepository.findAppointments(startDate, endDate,doctor, pageable);
+        // Fetch appointments with optional date filters
+        final Page<UserAppointmentSchedule> userAppointmentSchedulesPage =
+                userAppointmentScheduleRepository.findAppointments(startDate, endDate, doctor, pageable);
 
-    // Convert to a list
-    final List<UserAppointmentSchedule> appointments = userAppointmentSchedulesPage.getContent();
+        // Convert to a list
+        final List<UserAppointmentSchedule> appointments = userAppointmentSchedulesPage.getContent();
 
-    return GetAllAppointmentResponseData.builder()
-            .success(true)
-            .appointments(appointments) // Include appointments in the response
-            .totalPages(userAppointmentSchedulesPage.getTotalPages())
-            .totalElements(userAppointmentSchedulesPage.getTotalElements())
-            .currentPage(userAppointmentSchedulesPage.getNumber())
-            .build();
-}
+        return GetAllAppointmentResponseData.builder()
+                .success(true)
+                .appointments(appointments) // Include appointments in the response
+                .totalPages(userAppointmentSchedulesPage.getTotalPages())
+                .totalElements(userAppointmentSchedulesPage.getTotalElements())
+                .currentPage(userAppointmentSchedulesPage.getNumber())
+                .build();
+    }
 
 }
