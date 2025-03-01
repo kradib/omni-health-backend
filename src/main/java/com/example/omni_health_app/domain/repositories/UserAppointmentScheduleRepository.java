@@ -35,5 +35,20 @@ public interface UserAppointmentScheduleRepository extends JpaRepository<UserApp
     @Query("SELECT u FROM UserAppointmentSchedule u WHERE u.status != 2 AND u.appointmentDateTime BETWEEN :startDateTime AND :endDateTime")
     List<UserAppointmentSchedule> findPendingAppointments(LocalDateTime startDateTime, LocalDateTime endDateTime);
 
+    @Query("SELECT u FROM UserAppointmentSchedule u " +
+    "JOIN u.userDetail d " +
+    "WHERE (:startDate IS NULL OR u.appointmentDateTime >= :startDate) " +
+    "AND (:endDate IS NULL OR u.appointmentDateTime <= :endDate) " +
+    "AND (:doctorName IS NULL OR u.doctorName LIKE %:doctorName%)"
+     )
+     Page<UserAppointmentSchedule> findAppointments(
+     @Param("startDate") LocalDateTime startDate,
+     @Param("endDate") LocalDateTime endDate,
+     @Param("doctorName") String doctorName,
+     Pageable pageable
+     );
+
+
+
 
 }

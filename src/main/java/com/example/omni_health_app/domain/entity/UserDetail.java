@@ -21,6 +21,8 @@ public class UserDetail {
     private String phoneNumber;
     private String firstGuardianUserId;
     private String secondGuardianUserId;
+    private String major;
+    private String location;
 
     @OneToOne(mappedBy = "userDetail")
     @JsonBackReference

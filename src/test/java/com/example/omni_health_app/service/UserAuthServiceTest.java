@@ -95,11 +95,14 @@ public class UserAuthServiceTest {
         UserAuth userAuth = UserAuth.builder()
                 .username(request.getUsername())
                 .password("hashedPassword")
+                .roles("ROLE_PATIENT") // Ensure this exists
                 .build();
 
         when(userAuthRepository.findByUsername(eq(request.getUsername()))).thenReturn(Optional.of(userAuth));
         when(passwordEncoder.matches(eq(request.getPassword()), eq(userAuth.getPassword()))).thenReturn(true);
-        when(tokenUtil.generateToken(eq(request.getUsername()))).thenReturn("testToken");
+        
+        // Pass userAuth to generateToken
+        when(tokenUtil.generateToken(eq(request.getUsername()), eq(userAuth))).thenReturn("testToken");
 
         String token = userAuthService.signIn(request);
 
@@ -117,6 +120,7 @@ public class UserAuthServiceTest {
         UserAuth userAuth = UserAuth.builder()
                 .username(request.getUsername())
                 .password("hashedPassword")
+                .roles("ROLE_PATIENT")
                 .build();
 
         when(userAuthRepository.findByUsername(eq(request.getUsername()))).thenReturn(Optional.of(userAuth));
@@ -205,5 +209,4 @@ public class UserAuthServiceTest {
 
         assertThrows(UserAuthException.class, () -> userAuthService.resetPassword(token, newPassword));
     }
-
 }

@@ -72,7 +72,7 @@ public class UserAuthService {
             throw new UserAuthException("Invalid pass word provided");
         }
 
-        return tokenUtil.generateToken(userAuth.getUsername());
+        return tokenUtil.generateToken(userAuth.getUsername(),userAuth);
     }
 
     public void processForgotPassword(String userName) {

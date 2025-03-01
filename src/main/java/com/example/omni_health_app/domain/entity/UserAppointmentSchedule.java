@@ -34,6 +34,12 @@ public class UserAppointmentSchedule {
     @Column(nullable = false)
     private Integer status;
 
+    @Column(nullable = false)
+    private String appointmentStatus;
+
+    @Column(nullable = true)
+    private String prescription;
+
     @ManyToOne(optional = false)
     @JoinColumn(name = "user_detail_id", referencedColumnName = "id")
     private UserDetail userDetail;

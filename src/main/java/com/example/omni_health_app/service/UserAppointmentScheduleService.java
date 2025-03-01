@@ -37,6 +37,7 @@ public class UserAppointmentScheduleService {
                     .appointmentPlace(dto.getAppointmentPlace())
                     .appointmentDateTime(dto.getAppointmentDateTime())
                     .doctorName(dto.getDoctorName())
+                    .appointmentStatus(dto.getAppointmentStatus())
                     .username(userName)
                     .status(AppointmentStatus.CREATED.getStatus())
                     .userDetail(userAuth.getUserDetail())

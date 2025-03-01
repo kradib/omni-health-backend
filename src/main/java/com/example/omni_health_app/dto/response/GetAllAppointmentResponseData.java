@@ -19,6 +19,7 @@ public class GetAllAppointmentResponseData {
 
     private boolean success;
     private List<UserAppointmentSchedule> ownAppointments;
+    private List<UserAppointmentSchedule> appointments;
     private Map<String, List<UserAppointmentSchedule>> dependentAppointments;
     private int totalPages;
     private long totalElements;
