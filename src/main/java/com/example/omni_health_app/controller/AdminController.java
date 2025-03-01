@@ -66,9 +66,7 @@ public class AdminController {
     public ResponseEntity<ResponseWrapper<UserSignInResponseData>> signIn(@RequestBody @NonNull UserSignInRequest request) throws UserAuthException {
         log.info("Received user sign-in request for username: {}", request.getUsername());
         final ResponseWrapper<UserSignInResponseData> responseWrapper = UserSignInResponse.builder()
-                .data(UserSignInResponseData.builder()
-                        .authToken(userAuthService.signIn(request))
-                        .build())
+                .data(userAuthService.signIn(request))
                 .responseMetadata(ResponseMetadata.builder()
                         .statusCode(HttpStatus.OK.value())
                         .errorCode(0)

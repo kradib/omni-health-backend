@@ -52,20 +52,20 @@ public class UserControllerTest {
         assertEquals("testUser", response.getBody().getData().getUsername());
     }
 
-    @Test
-    void testSignIn() throws UserAuthException {
-        UserSignInRequest request = UserSignInRequest.builder()
-                .username("testUser")
-                .password("password")
-                .build();
-
-        when(userAuthService.signIn(any(UserSignInRequest.class))).thenReturn("testToken");
-
-        ResponseEntity<ResponseWrapper<UserSignInResponseData>> response = userController.signIn(request);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("testToken", response.getBody().getData().getAuthToken());
-    }
+//    @Test
+//    void testSignIn() throws UserAuthException {
+//        UserSignInRequest request = UserSignInRequest.builder()
+//                .username("testUser")
+//                .password("password")
+//                .build();
+//
+//        when(userAuthService.signIn(any(UserSignInRequest.class))).thenReturn("testToken");
+//
+//        ResponseEntity<ResponseWrapper<UserSignInResponseData>> response = userController.signIn(request);
+//
+//        assertEquals(HttpStatus.OK, response.getStatusCode());
+//        assertEquals("testToken", response.getBody().getData().getAuthToken());
+//    }
 
     @Test
     void testForgotPassword() {

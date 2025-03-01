@@ -5,6 +5,7 @@ import com.example.omni_health_app.domain.entity.UserDetail;
 import com.example.omni_health_app.domain.repositories.UserAuthRepository;
 import com.example.omni_health_app.dto.request.UserSignInRequest;
 import com.example.omni_health_app.dto.request.UserSignUpRequest;
+import com.example.omni_health_app.dto.response.UserSignInResponseData;
 import com.example.omni_health_app.exception.UserAuthException;
 import com.example.omni_health_app.util.TokenUtil;
 import lombok.RequiredArgsConstructor;
@@ -66,7 +67,7 @@ public class UserAuthService {
     }
 
 
-    public String signIn(UserSignInRequest request) throws UserAuthException {
+    public UserSignInResponseData signIn(UserSignInRequest request) throws UserAuthException {
         UserAuth userAuth = userAuthRepository.findByUsername(request.getUsername())
                 .orElseThrow(() -> new UserAuthException("The User name does not exist"));
 
@@ -74,7 +75,10 @@ public class UserAuthService {
             throw new UserAuthException("Invalid pass word provided");
         }
 
-        return tokenUtil.generateToken(userAuth.getUsername(),userAuth);
+        return UserSignInResponseData.builder()
+                .authToken(tokenUtil.generateToken(userAuth.getUsername(),userAuth))
+                .userDetail(userAuth.getUserDetail())
+                .build();
     }
 
     public void processForgotPassword(String userName) {
