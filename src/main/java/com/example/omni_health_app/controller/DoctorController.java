@@ -21,7 +21,7 @@ public class DoctorController {
 
     private final DoctorService doctorService;
 
-    @PatchMapping("appointment/{appointmentId}")
+    @PatchMapping("/appointment/{appointmentId}")
     @PreAuthorize("hasRole('DOCTOR')")
     public ResponseEntity<ResponseWrapper<UpdateAppointmentResponseData>> updateAppointmentSchedule(
             @PathVariable("appointmentId") Long appointmentId,
@@ -40,6 +40,21 @@ public class DoctorController {
                 .build();
         return ResponseEntity.ok(responseWrapper);
 
+    }
+
+    @GetMapping
+    public ResponseEntity<ResponseWrapper<ListDoctorsResponseData>> listDoctors() {
+        log.info("Received request to fetch doctor list");
+        final ResponseWrapper<ListDoctorsResponseData> responseWrapper = ListDoctorsResponse.builder()
+                .data(ListDoctorsResponseData.builder()
+                        .doctorDetails(doctorService.listDoctors())
+                        .build())
+                .responseMetadata(ResponseMetadata.builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .errorCode(0)
+                        .build())
+                .build();
+        return ResponseEntity.ok(responseWrapper);
     }
 
 }

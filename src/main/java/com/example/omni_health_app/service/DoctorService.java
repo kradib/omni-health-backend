@@ -1,7 +1,13 @@
 package com.example.omni_health_app.service;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
+import com.example.omni_health_app.domain.entity.UserAuth;
+import com.example.omni_health_app.domain.entity.UserDetail;
+import com.example.omni_health_app.domain.repositories.UserAuthRepository;
+import com.example.omni_health_app.dto.response.UserDetailWithRoles;
 import org.springframework.stereotype.Service;
 
 import com.example.omni_health_app.domain.entity.UserAppointmentSchedule;
@@ -12,10 +18,13 @@ import com.example.omni_health_app.exception.BadRequestException;
 
 import lombok.RequiredArgsConstructor;
 
+import static com.example.omni_health_app.util.Constants.DOCTOR_ROLE;
+
 @Service
 @RequiredArgsConstructor
 public class DoctorService {
     private final UserAppointmentScheduleRepository userAppointmentScheduleRepository;
+    private final UserAuthRepository userAuthRepository;
 
      public UpdateAppointmentResponseData updateAppointmentScheduleStatus(final String userName, Long appointmentId,
                                                                    UpdateAppointmentStatusRequest dto) throws BadRequestException {
@@ -45,6 +54,13 @@ public class DoctorService {
                 .userName(updatedUserAppointmentSchedule.getUsername())
                 .doctorName(updatedUserAppointmentSchedule.getDoctorName())
                 .build();
+    }
+
+    public List<UserDetail> listDoctors() {
+        List<UserAuth> users = userAuthRepository.findByRolesContaining(DOCTOR_ROLE);
+        return users.stream()
+                .map(UserAuth::getUserDetail)
+                .collect(Collectors.toList());
     }
 
 

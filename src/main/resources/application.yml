@@ -2,9 +2,9 @@ spring:
   application:
     name: omni-health-app
   datasource:
-    url: jdbc:mysql://localhost:3306/omni_health
+    url: jdbc:mysql://localhost:3306/omni-health
     username: root
-    password:
+    password: root
     driver-class-name: com.mysql.cj.jdbc.Driver
   # Flyway configuration
   flyway:
@@ -18,8 +18,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: <<your email>> # your email
-    password: <<password>> #your email app passowrd
+    username: omnihealthapp@gmail.com # your email
+    password: Feddqvzrvvnqdihs #your email app passowrd
     properties:
       mail:
         smtp:
@@ -30,7 +30,7 @@ spring:
 #auth
 omni:
   auth:
-    secret: DqY69Wv3kGxI5aM4eXJxW65ZNMnU8rM62d/HZOm6T6tcTTB9ZUE3qvCefrKvzo3fF6DCR1Ip1au1OxB1PkQXJQ== #128 char secret
+    secret: 592d40df8f451da901e27c41755fb46a75f1572351dc2478ecca20de2b64baafac8bf0cf4af8a4a746030804f4dc954236e9b2143eddaa097b4a568f397cceca #128 char secret
     expiration: 43200000 #12 hours in milliseconds
 
 aws:

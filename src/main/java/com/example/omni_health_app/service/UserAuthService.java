@@ -18,6 +18,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import static com.example.omni_health_app.util.Constants.CACHE_NAME;
+import static com.example.omni_health_app.util.Constants.PATIENT_ROLE;
 
 @Service
 @RequiredArgsConstructor
@@ -56,6 +57,7 @@ public class UserAuthService {
                 .userDetail(userDetail)
                 .username(request.getUsername())
                 .password(passwordEncoder.encode(request.getPassword()))
+                .roles(PATIENT_ROLE)
                 .build();
 
         UserAuth savedUser = userAuthRepository.save(userAuth);
