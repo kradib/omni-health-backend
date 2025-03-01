@@ -115,10 +115,6 @@ public class UserAppointmentScheduleService {
         final Page<UserAppointmentSchedule> userAppointmentSchedulesPage =
                 userAppointmentScheduleRepository.findAppointmentsByUserAndDateRange(userName, startDate, endDate, pageable);
 
-        if (userAppointmentSchedulesPage.isEmpty()) {
-            throw new BadRequestException(String.format("No appointments found for user %s", userName));
-        }
-
         final List<UserAppointmentSchedule> ownAppointments = userAppointmentSchedulesPage.stream()
                 .filter(appointment -> appointment.getUsername().equals(userName))
                 .toList();

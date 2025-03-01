@@ -87,8 +87,8 @@ public class UserAppointmentScheduleController {
 
     @GetMapping
     public ResponseEntity<ResponseWrapper<GetAllAppointmentResponseData>> getAllAppointmentSchedule(
-            @RequestParam("startDate") String startDate,
-            @RequestParam("endDate") String endDate,
+            @RequestParam(value = "startDate", required = false) String startDate,
+            @RequestParam(value = "endDate", required = false) String endDate,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size) throws BadRequestException {
         final String userName = getCurrentUsername();
@@ -96,7 +96,9 @@ public class UserAppointmentScheduleController {
         final Pageable pageable = PageRequest.of(page, size);
         final ResponseWrapper<GetAllAppointmentResponseData> responseWrapper = GetAllAppointmentResponse.builder()
                 .data(userAppointmentScheduleService.getAllAppointmentSchedule(userName,
-                        LocalDateTime.parse(startDate), LocalDateTime.parse(endDate), pageable))
+                        startDate == null? LocalDateTime.now().minusDays(30) :LocalDateTime.parse(startDate),
+                        endDate == null ? LocalDateTime.now() : LocalDateTime.parse(endDate),
+                        pageable))
                 .responseMetadata(ResponseMetadata.builder()
                         .statusCode(HttpStatus.OK.value())
                         .errorCode(0)
