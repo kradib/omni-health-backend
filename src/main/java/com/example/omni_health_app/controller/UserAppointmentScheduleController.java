@@ -94,9 +94,32 @@ public class UserAppointmentScheduleController {
             @RequestParam(value = "size", defaultValue = "10") int size) throws BadRequestException {
         final String userName = getCurrentUsername();
         log.info("Receive get all appointments from {} to {} for {}", startDate, endDate, userName);
-        final Pageable pageable = PageRequest.of(page, size, Sort.by("appointmentDateTime").descending());
+        final Pageable pageable = PageRequest.of(page, size);
         final ResponseWrapper<GetAllAppointmentResponseData> responseWrapper = GetAllAppointmentResponse.builder()
                 .data(userAppointmentScheduleService.getAllAppointmentSchedule(userName,
+                        startDate == null? LocalDateTime.now().minusDays(30) :LocalDateTime.parse(startDate),
+                        endDate == null ? LocalDateTime.now() : LocalDateTime.parse(endDate),
+                        pageable))
+                .responseMetadata(ResponseMetadata.builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .errorCode(0)
+                        .build())
+                .build();
+        return ResponseEntity.ok(responseWrapper);
+
+    }
+
+    @GetMapping("/dependents")
+    public ResponseEntity<ResponseWrapper<GetAllAppointmentResponseData>> getAllAppointmentScheduleForDependents(
+            @RequestParam(value = "startDate", required = false) String startDate,
+            @RequestParam(value = "endDate", required = false) String endDate,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) throws BadRequestException {
+        final String userName = getCurrentUsername();
+        log.info("Receive get all dependent appointments from {} to {} for {}", startDate, endDate, userName);
+        final Pageable pageable = PageRequest.of(page, size);
+        final ResponseWrapper<GetAllAppointmentResponseData> responseWrapper = GetAllAppointmentResponse.builder()
+                .data(userAppointmentScheduleService.getAllAppointmentScheduleForDependents(userName,
                         startDate == null? LocalDateTime.now().minusDays(30) :LocalDateTime.parse(startDate),
                         endDate == null ? LocalDateTime.now() : LocalDateTime.parse(endDate),
                         pageable))
