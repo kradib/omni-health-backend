@@ -25,22 +25,17 @@ public class UserAppointmentSchedule {
     @Column(nullable = false)
     private LocalDateTime appointmentDateTime;
 
-    @Column(nullable = false, length = 500)
-    private String appointmentPlace;
-
-    @Column(nullable = false, length = 100)
-    private String doctorName;
-
-    @Column(nullable = false)
-    private Integer status;
-
     @Column(nullable = false)
     private String appointmentStatus;
 
     @Column(nullable = true)
     private String prescription;
 
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, fetch = FetchType.EAGER)
     @JoinColumn(name = "user_detail_id", referencedColumnName = "id")
     private UserDetail userDetail;
+
+    @ManyToOne(optional = false, fetch = FetchType.EAGER)
+    @JoinColumn(name = "doctor_detail_id", referencedColumnName = "id")
+    private UserDetail doctorDetail;
 }

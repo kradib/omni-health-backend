@@ -2,6 +2,7 @@
 package com.example.omni_health_app.dto.response;
 
 
+import com.example.omni_health_app.domain.entity.UserAppointmentSchedule;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,7 +17,5 @@ import java.time.LocalDateTime;
 public class UpdateAppointmentResponseData {
 
     private boolean success;
-    private LocalDateTime appointmentTime;
-    private String userName;
-    private String doctorName;
+    private UserAppointmentSchedule userAppointmentSchedule;
 }

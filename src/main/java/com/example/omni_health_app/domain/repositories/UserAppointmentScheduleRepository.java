@@ -16,8 +16,8 @@ import java.util.List;
 public interface UserAppointmentScheduleRepository extends JpaRepository<UserAppointmentSchedule, Long> {
 
     @Modifying
-    @Query("UPDATE UserAppointmentSchedule u SET u.status = :status WHERE u.id = :id")
-    int cancelAppointmentById(Long id, Integer status);
+    @Query("UPDATE UserAppointmentSchedule u SET u.appointmentStatus = :status WHERE u.id = :id")
+    int cancelAppointmentById(Long id, String status);
 
     @Query("SELECT u FROM UserAppointmentSchedule u " +
             "JOIN u.userDetail d " +
@@ -32,19 +32,21 @@ public interface UserAppointmentScheduleRepository extends JpaRepository<UserApp
             Pageable pageable
     );
 
-    @Query("SELECT u FROM UserAppointmentSchedule u WHERE u.status != 2 AND u.appointmentDateTime BETWEEN :startDateTime AND :endDateTime")
+
+    @Query("SELECT u FROM UserAppointmentSchedule u WHERE u.appointmentStatus != \"cancelled\" AND u.appointmentDateTime BETWEEN :startDateTime" +
+            " AND :endDateTime")
     List<UserAppointmentSchedule> findPendingAppointments(LocalDateTime startDateTime, LocalDateTime endDateTime);
 
     @Query("SELECT u FROM UserAppointmentSchedule u " +
     "JOIN u.userDetail d " +
     "WHERE (:startDate IS NULL OR u.appointmentDateTime >= :startDate) " +
     "AND (:endDate IS NULL OR u.appointmentDateTime <= :endDate) " +
-    "AND (:doctorName IS NULL OR u.doctorName LIKE %:doctorName%)"
+    "AND (d.id = :doctorId)"
      )
      Page<UserAppointmentSchedule> findAppointments(
      @Param("startDate") LocalDateTime startDate,
      @Param("endDate") LocalDateTime endDate,
-     @Param("doctorName") String doctorName,
+     @Param("doctorId") Long doctorId,
      Pageable pageable
      );
 

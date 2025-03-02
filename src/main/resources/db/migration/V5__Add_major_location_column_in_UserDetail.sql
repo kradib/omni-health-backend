@@ -1,3 +1,0 @@
-ALTER TABLE user_detail 
-ADD COLUMN major VARCHAR(255) NULL, 
-ADD COLUMN location VARCHAR(255) NULL;

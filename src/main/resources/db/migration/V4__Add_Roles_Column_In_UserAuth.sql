@@ -1,1 +1,0 @@
-ALTER TABLE user_auth ADD COLUMN roles VARCHAR(255) NOT NULL DEFAULT 'patient';

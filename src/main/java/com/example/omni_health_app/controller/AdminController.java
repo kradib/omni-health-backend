@@ -162,11 +162,11 @@ public class AdminController {
     public ResponseEntity<ResponseWrapper<GetAllAppointmentResponseData>> getAllAppointmentSchedule(
             @RequestParam(value = "startDate", required = false) String startDate,
             @RequestParam(value = "endDate", required = false) String endDate,
-            @RequestParam(value = "doctor", required = false) String doctor,
+            @RequestParam(value = "doctorId", required = false) Long doctorId,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size) throws BadRequestException {
 
-        log.info("Receive get all appointments from {} to {} for {}", startDate, endDate, doctor);
+        log.info("Receive get all appointments from {} to {} for {}", startDate, endDate, doctorId);
 
         final Pageable pageable = PageRequest.of(page, size);
 
@@ -176,7 +176,7 @@ public class AdminController {
 
 
         final ResponseWrapper<GetAllAppointmentResponseData> responseWrapper = GetAllAppointmentResponse.builder()
-                .data(adminService.getAllAppointmentSchedule(doctor, startDateTime, endDateTime, pageable))
+                .data(adminService.getAllAppointmentSchedule(doctorId, startDateTime, endDateTime, pageable))
                 .responseMetadata(ResponseMetadata.builder()
                         .statusCode(HttpStatus.OK.value())
                         .errorCode(0)

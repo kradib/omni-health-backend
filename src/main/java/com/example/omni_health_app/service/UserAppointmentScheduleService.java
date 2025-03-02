@@ -6,12 +6,14 @@ import com.example.omni_health_app.domain.entity.UserDetail;
 import com.example.omni_health_app.domain.model.AppointmentStatus;
 import com.example.omni_health_app.domain.repositories.UserAppointmentScheduleRepository;
 import com.example.omni_health_app.domain.repositories.UserAuthRepository;
+import com.example.omni_health_app.domain.repositories.UserDetailsRepository;
 import com.example.omni_health_app.dto.request.CancelAppointmentRequest;
 import com.example.omni_health_app.dto.request.CreateAppointmentRequest;
 import com.example.omni_health_app.dto.request.UpdateAppointmentRequest;
 import com.example.omni_health_app.dto.response.*;
 import com.example.omni_health_app.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,22 +26,26 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserAppointmentScheduleService {
 
     private final UserAppointmentScheduleRepository userAppointmentScheduleRepository;
     private final UserAuthRepository userAuthRepository;
+    private final UserDetailsRepository userDetailsRepository;
 
 
     public CreateAppointmentResponseData createAppointmentSchedule( final String userName, CreateAppointmentRequest dto) throws BadRequestException {
         final Optional<UserAuth> userAuthOptional = userAuthRepository.findByUsername(userName);
+        final Optional<UserDetail> doctorDetails = userDetailsRepository.findById(dto.getDoctorId());
+        if(doctorDetails.isEmpty()) {
+            throw new BadRequestException(String.format("doctor with id %s does not exists", dto.getDoctorId()));
+        }
         return userAuthOptional.map(userAuth -> {
             final UserAppointmentSchedule schedule = UserAppointmentSchedule.builder()
-                    .appointmentPlace(dto.getAppointmentPlace())
                     .appointmentDateTime(dto.getAppointmentDateTime())
-                    .doctorName(dto.getDoctorName())
-                    .appointmentStatus(dto.getAppointmentStatus())
+                    .doctorDetail(doctorDetails.get())
                     .username(userName)
-                    .status(AppointmentStatus.CREATED.getStatus())
+                    .appointmentStatus(AppointmentStatus.CREATED.getStatus())
                     .userDetail(userAuth.getUserDetail())
                     .build();
             final UserAppointmentSchedule createdUserAppointmentSchedule =
@@ -66,7 +72,7 @@ public class UserAppointmentScheduleService {
         if(!userAppointmentSchedule.getUsername().equals(userName)) {
             throw new BadRequestException(String.format("AppointId %s does not belong to this user %s ", dto.getAppointmentId(), userName));
         }
-        userAppointmentSchedule.setStatus(AppointmentStatus.CANCELLED.getStatus());
+        userAppointmentSchedule.setAppointmentStatus(AppointmentStatus.CANCELLED.getStatus());
         userAppointmentScheduleRepository.save(userAppointmentSchedule);
         return CancelAppointmentResponseData.builder()
                 .success(true)
@@ -88,16 +94,12 @@ public class UserAppointmentScheduleService {
         if(!userAppointmentSchedule.getUsername().equals(userName)) {
             throw new BadRequestException(String.format("AppointId %s does not belong to this user %s ",appointmentId, userName));
         }
-        userAppointmentSchedule.setStatus(AppointmentStatus.UPDATED.getStatus());
-        userAppointmentSchedule.setAppointmentPlace(dto.getAppointmentPlace());
+        userAppointmentSchedule.setAppointmentStatus(AppointmentStatus.UPDATED.getStatus());
         userAppointmentSchedule.setAppointmentDateTime(dto.getAppointmentDateTime());
-        userAppointmentSchedule.setDoctorName(dto.getDoctorName());
         final UserAppointmentSchedule updatedUserAppointmentSchedule = userAppointmentScheduleRepository.save(userAppointmentSchedule);
         return UpdateAppointmentResponseData.builder()
                 .success(true)
-                .appointmentTime(updatedUserAppointmentSchedule.getAppointmentDateTime())
-                .userName(updatedUserAppointmentSchedule.getUsername())
-                .doctorName(updatedUserAppointmentSchedule.getDoctorName())
+                .userAppointmentSchedule(updatedUserAppointmentSchedule)
                 .build();
     }
 
@@ -118,6 +120,7 @@ public class UserAppointmentScheduleService {
         final List<UserAppointmentSchedule> ownAppointments = userAppointmentSchedulesPage.stream()
                 .filter(appointment -> appointment.getUsername().equals(userName))
                 .toList();
+        log.info("ownAppointments: {}", ownAppointments);
 
         Map<String, List<UserAppointmentSchedule>> dependentAppointments = userAppointmentSchedulesPage.stream()
                 .filter(appointment -> {

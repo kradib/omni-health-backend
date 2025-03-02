@@ -123,14 +123,14 @@ public class AdminService {
     }
 
     public GetAllAppointmentResponseData getAllAppointmentSchedule(
-            final String doctor,
+            final Long doctorId,
             final LocalDateTime startDate,
             final LocalDateTime endDate,
             final Pageable pageable) {
 
         // Fetch appointments with optional date filters
         final Page<UserAppointmentSchedule> userAppointmentSchedulesPage =
-                userAppointmentScheduleRepository.findAppointments(startDate, endDate, doctor, pageable);
+                userAppointmentScheduleRepository.findAppointments(startDate, endDate, doctorId, pageable);
 
         // Convert to a list
         final List<UserAppointmentSchedule> appointments = userAppointmentSchedulesPage.getContent();

@@ -4,6 +4,8 @@ CREATE TABLE user_detail (
     last_name VARCHAR(255) NOT NULL,
     email VARCHAR(255) NOT NULL UNIQUE,
     phone_number VARCHAR(15) NOT NULL UNIQUE,
+    major VARCHAR(255) NULL,
+    location VARCHAR(255) NULL,
     first_guardian_user_id VARCHAR(15) NULL,
     second_guardian_user_id VARCHAR(15) NULL
 );

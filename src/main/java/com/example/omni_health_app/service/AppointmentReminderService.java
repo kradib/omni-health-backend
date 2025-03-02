@@ -102,10 +102,10 @@ public class AppointmentReminderService {
                 </html>
                 """,
                 appointment.getUsername(),
-                appointment.getDoctorName(),
+                appointment.getDoctorDetail().getFirstName() + " " + appointment.getDoctorDetail().getLastName(),
                 appointment.getAppointmentDateTime().toLocalDate(),
                 appointment.getAppointmentDateTime().toLocalTime(),
-                appointment.getAppointmentPlace()
+                appointment.getDoctorDetail().getLocation()
         );
     }
 
@@ -163,10 +163,10 @@ public class AppointmentReminderService {
                 """,
                 guardianName,
                 appointment.getUsername(),
-                appointment.getDoctorName(),
+                appointment.getDoctorDetail().getFirstName() + " " + appointment.getDoctorDetail().getLastName(),
                 appointment.getAppointmentDateTime().toLocalDate(),
                 appointment.getAppointmentDateTime().toLocalTime(),
-                appointment.getAppointmentPlace()
+                appointment.getDoctorDetail().getLocation()
         );
     }
 

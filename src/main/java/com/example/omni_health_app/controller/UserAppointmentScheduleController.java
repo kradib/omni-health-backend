@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -93,7 +94,7 @@ public class UserAppointmentScheduleController {
             @RequestParam(value = "size", defaultValue = "10") int size) throws BadRequestException {
         final String userName = getCurrentUsername();
         log.info("Receive get all appointments from {} to {} for {}", startDate, endDate, userName);
-        final Pageable pageable = PageRequest.of(page, size);
+        final Pageable pageable = PageRequest.of(page, size, Sort.by("appointmentDateTime").descending());
         final ResponseWrapper<GetAllAppointmentResponseData> responseWrapper = GetAllAppointmentResponse.builder()
                 .data(userAppointmentScheduleService.getAllAppointmentSchedule(userName,
                         startDate == null? LocalDateTime.now().minusDays(30) :LocalDateTime.parse(startDate),

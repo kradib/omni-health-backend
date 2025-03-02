@@ -9,6 +9,4 @@ import java.time.LocalDateTime;
 @Builder
 public class UpdateAppointmentRequest {
     private LocalDateTime appointmentDateTime;
-    private String appointmentPlace;
-    private String doctorName;
 }

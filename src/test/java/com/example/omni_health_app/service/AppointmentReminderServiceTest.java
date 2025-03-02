@@ -45,8 +45,8 @@ public class AppointmentReminderServiceTest {
 
         appointment.setUserDetail(userDetail);
         appointment.setAppointmentDateTime(LocalDateTime.now().plusDays(1));
-        appointment.setAppointmentPlace("Clinic");
-        appointment.setDoctorName("Dr. Smith");
+//        appointment.setAppointmentPlace("Clinic");
+//        appointment.setDoctorName("Dr. Smith");
         appointment.setUsername("testUser");
 
         when(userDetail.getEmail()).thenReturn("user@example.com");
