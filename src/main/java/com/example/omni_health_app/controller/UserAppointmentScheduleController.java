@@ -90,15 +90,17 @@ public class UserAppointmentScheduleController {
     public ResponseEntity<ResponseWrapper<GetAllAppointmentResponseData>> getAllAppointmentSchedule(
             @RequestParam(value = "startDate", required = false) String startDate,
             @RequestParam(value = "endDate", required = false) String endDate,
+            @RequestParam(value = "status", required = false) String status,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size) throws BadRequestException {
         final String userName = getCurrentUsername();
-        log.info("Receive get all appointments from {} to {} for {}", startDate, endDate, userName);
+        log.info("Receive get all appointments from {} to {} for {} with status {}", startDate, endDate, userName, status);
         final Pageable pageable = PageRequest.of(page, size);
         final ResponseWrapper<GetAllAppointmentResponseData> responseWrapper = GetAllAppointmentResponse.builder()
                 .data(userAppointmentScheduleService.getAllAppointmentSchedule(userName,
-                        startDate == null? LocalDateTime.now().minusDays(30) :LocalDateTime.parse(startDate),
-                        endDate == null ? LocalDateTime.now() : LocalDateTime.parse(endDate),
+                        startDate == null? null :LocalDateTime.parse(startDate),
+                        endDate == null ? null : LocalDateTime.parse(endDate),
+                        status,
                         pageable))
                 .responseMetadata(ResponseMetadata.builder()
                         .statusCode(HttpStatus.OK.value())
@@ -113,15 +115,18 @@ public class UserAppointmentScheduleController {
     public ResponseEntity<ResponseWrapper<GetAllAppointmentResponseData>> getAllAppointmentScheduleForDependents(
             @RequestParam(value = "startDate", required = false) String startDate,
             @RequestParam(value = "endDate", required = false) String endDate,
+            @RequestParam(value = "status", required = false) String status,
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size) throws BadRequestException {
         final String userName = getCurrentUsername();
-        log.info("Receive get all dependent appointments from {} to {} for {}", startDate, endDate, userName);
+        log.info("Receive get all dependent appointments from {} to {} for {} with status {}", startDate, endDate,
+                userName, status);
         final Pageable pageable = PageRequest.of(page, size);
         final ResponseWrapper<GetAllAppointmentResponseData> responseWrapper = GetAllAppointmentResponse.builder()
                 .data(userAppointmentScheduleService.getAllAppointmentScheduleForDependents(userName,
-                        startDate == null? LocalDateTime.now().minusDays(30) :LocalDateTime.parse(startDate),
-                        endDate == null ? LocalDateTime.now() : LocalDateTime.parse(endDate),
+                        startDate == null? null : LocalDateTime.parse(startDate),
+                        endDate == null ? null : LocalDateTime.parse(endDate),
+                        status,
                         pageable))
                 .responseMetadata(ResponseMetadata.builder()
                         .statusCode(HttpStatus.OK.value())

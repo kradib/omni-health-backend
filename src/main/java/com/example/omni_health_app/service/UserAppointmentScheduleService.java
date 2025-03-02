@@ -109,6 +109,7 @@ public class UserAppointmentScheduleService {
             final String userName,
             final LocalDateTime startDate,
             final LocalDateTime endDate,
+            final String status,
             final Pageable pageable) throws BadRequestException {
         int pageSize = pageable.getPageSize();
         int pageNumber = pageable.getPageNumber();
@@ -120,9 +121,10 @@ public class UserAppointmentScheduleService {
         log.info("offset: {}, pageSize: {}", offset, pageSize);
         final List<UserAppointmentSchedule> appointments =
                 userAppointmentScheduleRepository.findAppointmentsByUserAndDateRange(userName, startDate, endDate,
-                        pageSize, offset);
+                        status, pageSize, offset);
         log.info("ownAppointments: {}", appointments);
-        long totalRecords = userAppointmentScheduleRepository.countAppointmentsByUserAndDateRange(userName, startDate, endDate);
+        long totalRecords = userAppointmentScheduleRepository.countAppointmentsByUserAndDateRange(userName, startDate
+                , endDate, status);
         Page<UserAppointmentSchedule> userAppointmentSchedulesPage = new PageImpl<>(appointments, pageable, totalRecords);
         return GetAllAppointmentResponseData.builder()
                 .success(true)
@@ -137,6 +139,7 @@ public class UserAppointmentScheduleService {
             final String userName,
             final LocalDateTime startDate,
             final LocalDateTime endDate,
+            final String status,
             final Pageable pageable) throws BadRequestException {
         int pageSize = pageable.getPageSize();
         int pageNumber = pageable.getPageNumber();
@@ -147,9 +150,10 @@ public class UserAppointmentScheduleService {
         }
         final List<UserAppointmentSchedule> appointments =
                 userAppointmentScheduleRepository.findAppointmentsByDependentAndDateRange(userName, startDate, endDate,
-                        pageSize, offset);
+                        status, pageSize, offset);
         log.info("dependent Appointments: {}", appointments);
-        long totalRecords = userAppointmentScheduleRepository.countAppointmentsByDependentAndDateRange(userName, startDate, endDate);
+        long totalRecords = userAppointmentScheduleRepository.countAppointmentsByDependentAndDateRange(userName,
+                startDate, endDate, status);
         Page<UserAppointmentSchedule> userAppointmentSchedulesPage = new PageImpl<>(appointments, pageable, totalRecords);
         return GetAllAppointmentResponseData.builder()
                 .success(true)

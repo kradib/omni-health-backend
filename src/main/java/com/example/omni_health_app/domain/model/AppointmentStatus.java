@@ -12,7 +12,8 @@ public enum AppointmentStatus {
     CREATED("created"),
     CANCELLED("cancelled"),
     UPDATED("updated"),
-    CONFIRMED("confirmed");
+    CONFIRMED("confirmed"),
+    COMPLETED("completed");
 
     private final String status;
 

@@ -117,10 +117,10 @@ public class UserAppointmentScheduleControllerTest {
                 .totalPages(1)
                 .build();
 
-        when(service.getAllAppointmentSchedule(any(), any(), any(), any())).thenReturn(responseData);
+        when(service.getAllAppointmentSchedule(any(), any(), any(), any(), any())).thenReturn(responseData);
 
         ResponseEntity<ResponseWrapper<GetAllAppointmentResponseData>> response = controller.getAllAppointmentSchedule(
-                startDate, endDate, 0, 10);
+                startDate, endDate, "created", 0, 10);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(1L, response.getBody().getData().getTotalElements());
