@@ -20,7 +20,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UserAuthException.class)
     public ResponseEntity<ResponseWrapper<ErrorResponseData>> handleUserAuthException(UserAuthException ex) {
         ResponseMetadata responseMetadata = ResponseMetadata.builder()
-                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .statusCode(HttpStatus.UNAUTHORIZED.value())
                 .errors(List.of(ex.getMessage()))
                 .errorCode(BAD_REQUEST_WRONG_AUTH_ERROR)
                 .build();

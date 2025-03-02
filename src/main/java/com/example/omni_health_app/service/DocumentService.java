@@ -1,0 +1,105 @@
+package com.example.omni_health_app.service;
+
+import com.example.omni_health_app.domain.entity.DocumentEntity;
+import com.example.omni_health_app.domain.entity.UserAuth;
+import com.example.omni_health_app.domain.repositories.DocumentRepository;
+import com.example.omni_health_app.domain.repositories.UserAuthRepository;
+import com.example.omni_health_app.dto.response.DownloadDocumentResponseData;
+import com.example.omni_health_app.exception.BadRequestException;
+import com.example.omni_health_app.exception.UserAuthException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+
+
+@Service
+@RequiredArgsConstructor
+public class DocumentService {
+
+    private static final Set<String> ALLOWED_EXTENSIONS = Set.of("pdf", "jpg", "jpeg");
+    private static final String BASE_UPLOAD_DIR = "/var/uploads/";
+    private final DocumentRepository documentRepository;
+    private final UserAuthRepository userAuthRepository;
+
+
+    public DocumentEntity uploadFile(MultipartFile file, String userName) throws BadRequestException, IOException {
+        final Optional<UserAuth> userAuthOptional = userAuthRepository.findByUsername(userName);
+        if (userAuthOptional.isEmpty()) {
+            throw new BadRequestException(String.format("User %s does not exist", userName));
+        }
+        String originalFilename = file.getOriginalFilename();
+        String fileExtension = getFileExtension(originalFilename);
+
+        if (!ALLOWED_EXTENSIONS.contains(fileExtension.toLowerCase())) {
+            throw new IllegalArgumentException("Only PDF and JPG files are allowed!");
+        }
+
+        String uniqueFileName = UUID.randomUUID() + "_" + originalFilename;
+
+        Path userFolderPath = Paths.get(BASE_UPLOAD_DIR, userName);
+        if (!Files.exists(userFolderPath)) {
+            Files.createDirectories(userFolderPath);
+        }
+        Path filePath = userFolderPath.resolve(uniqueFileName);
+        Files.write(filePath, file.getBytes());
+
+        DocumentEntity documentEntity = new DocumentEntity();
+        documentEntity.setUserName(userName);
+        documentEntity.setFilePath(filePath.toString());
+        documentRepository.save(documentEntity);
+        return documentEntity;
+    }
+
+    public List<DocumentEntity> getAllDocuments(String userName) throws BadRequestException {
+        final Optional<UserAuth> userAuthOptional = userAuthRepository.findByUsername(userName);
+        if (userAuthOptional.isEmpty()) {
+            throw new BadRequestException(String.format("User %s does not exist", userName));
+        }
+        return documentRepository.findByUserName(userName);
+    }
+
+    public DocumentEntity getDocument(String userName, long id) throws BadRequestException, UserAuthException, IOException {
+        final Optional<UserAuth> userAuthOptional = userAuthRepository.findByUsername(userName);
+        if (userAuthOptional.isEmpty()) {
+            throw new BadRequestException(String.format("User %s does not exist", userName));
+        }
+        Optional<DocumentEntity> documentEntityOptional = documentRepository.findById(id);
+
+        if (documentEntityOptional.isEmpty()) {
+            throw new BadRequestException("document does not exist");
+        }
+        if(!documentEntityOptional.get().getUserName().equals(userName)) {
+            throw new UserAuthException("Document does not belong to user");
+        }
+        Path filePath = Paths.get(documentEntityOptional.get().getFilePath());
+        Resource resource = new UrlResource(filePath.toUri());
+        if (!resource.exists() || !resource.isReadable()) {
+            throw new BadRequestException("document does not exist");
+        }
+        return documentEntityOptional.get();
+    }
+
+    private String getFileExtension(String filename) {
+        return filename.substring(filename.lastIndexOf(".") + 1);
+    }
+}
