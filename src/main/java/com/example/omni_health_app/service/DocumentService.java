@@ -27,6 +27,8 @@ import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -70,10 +72,12 @@ public class DocumentService {
         documentEntity.setUserName(userName);
         documentEntity.setDocumentName(documentName);
         documentEntity.setFilePath(filePath.toString());
+        documentEntity.setDateUploaded(LocalDateTime.now());
         documentRepository.save(documentEntity);
         return DocumentMetadata.builder()
                 .documentName(documentEntity.getDocumentName())
                 .id(documentEntity.getId())
+                .dateUploaded(documentEntity.getDateUploaded())
                 .build();
     }
 
@@ -85,6 +89,7 @@ public class DocumentService {
         return documentRepository.findByUserName(userName).stream().map(documentEntity -> DocumentMetadata.builder()
                 .id(documentEntity.getId())
                 .documentName(documentEntity.getDocumentName())
+                .dateUploaded(documentEntity.getDateUploaded())
                 .build()).toList();
     }
 
