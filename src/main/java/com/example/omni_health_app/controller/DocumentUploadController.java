@@ -27,7 +27,7 @@ import java.nio.file.Paths;
 import static com.example.omni_health_app.util.UserNameUtil.getCurrentUsername;
 
 @RestController
-@RequestMapping("/api/documents")
+@RequestMapping("/api/v1/documents")
 @RequiredArgsConstructor
 public class DocumentUploadController {
 
@@ -35,12 +35,13 @@ public class DocumentUploadController {
     private final DocumentService documentService;
 
     @PostMapping("/upload")
-    public ResponseEntity<ResponseWrapper<UploadDocumentResponseData>> uploadFile(@RequestParam("file") MultipartFile file) throws BadRequestException, IOException {
+    public ResponseEntity<ResponseWrapper<UploadDocumentResponseData>> uploadFile(@RequestParam("file") MultipartFile file, @RequestParam("documentName") String documentName)
+            throws BadRequestException, IOException {
 
         final String userName = getCurrentUsername();
         final ResponseWrapper<UploadDocumentResponseData> responseWrapper = UploadDocumentResponse.builder()
                 .data(UploadDocumentResponseData.builder()
-                        .documentEntity(documentService.uploadFile(file, userName))
+                        .documentMetadata(documentService.uploadFile(file, userName, documentName))
                         .build())
                 .responseMetadata(ResponseMetadata.builder()
                         .statusCode(HttpStatus.OK.value())

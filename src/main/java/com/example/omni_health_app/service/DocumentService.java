@@ -4,6 +4,7 @@ import com.example.omni_health_app.domain.entity.DocumentEntity;
 import com.example.omni_health_app.domain.entity.UserAuth;
 import com.example.omni_health_app.domain.repositories.DocumentRepository;
 import com.example.omni_health_app.domain.repositories.UserAuthRepository;
+import com.example.omni_health_app.dto.response.DocumentMetadata;
 import com.example.omni_health_app.dto.response.DownloadDocumentResponseData;
 import com.example.omni_health_app.exception.BadRequestException;
 import com.example.omni_health_app.exception.UserAuthException;
@@ -30,6 +31,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -42,7 +44,8 @@ public class DocumentService {
     private final UserAuthRepository userAuthRepository;
 
 
-    public DocumentEntity uploadFile(MultipartFile file, String userName) throws BadRequestException, IOException {
+    public DocumentMetadata uploadFile(MultipartFile file, String userName, String documentName)
+            throws BadRequestException, IOException {
         final Optional<UserAuth> userAuthOptional = userAuthRepository.findByUsername(userName);
         if (userAuthOptional.isEmpty()) {
             throw new BadRequestException(String.format("User %s does not exist", userName));
@@ -65,17 +68,24 @@ public class DocumentService {
 
         DocumentEntity documentEntity = new DocumentEntity();
         documentEntity.setUserName(userName);
+        documentEntity.setDocumentName(documentName);
         documentEntity.setFilePath(filePath.toString());
         documentRepository.save(documentEntity);
-        return documentEntity;
+        return DocumentMetadata.builder()
+                .documentName(documentEntity.getDocumentName())
+                .id(documentEntity.getId())
+                .build();
     }
 
-    public List<DocumentEntity> getAllDocuments(String userName) throws BadRequestException {
+    public List<DocumentMetadata> getAllDocuments(String userName) throws BadRequestException {
         final Optional<UserAuth> userAuthOptional = userAuthRepository.findByUsername(userName);
         if (userAuthOptional.isEmpty()) {
             throw new BadRequestException(String.format("User %s does not exist", userName));
         }
-        return documentRepository.findByUserName(userName);
+        return documentRepository.findByUserName(userName).stream().map(documentEntity -> DocumentMetadata.builder()
+                .id(documentEntity.getId())
+                .documentName(documentEntity.getDocumentName())
+                .build()).toList();
     }
 
     public DocumentEntity getDocument(String userName, long id) throws BadRequestException, UserAuthException, IOException {

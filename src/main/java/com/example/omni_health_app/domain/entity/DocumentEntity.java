@@ -13,6 +13,9 @@ public class DocumentEntity {
     private Long id;
 
     @Column(nullable = false)
+    private String documentName;
+
+    @Column(nullable = false)
     private String userName;
 
     @Column(nullable = false)

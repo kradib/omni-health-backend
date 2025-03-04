@@ -18,5 +18,5 @@ import java.util.List;
 public class GetAllDocumentsResponseData {
 
     private boolean success;
-    private List<DocumentEntity> documentMetaData;
+    private List<DocumentMetadata> documentMetaData;
 }
