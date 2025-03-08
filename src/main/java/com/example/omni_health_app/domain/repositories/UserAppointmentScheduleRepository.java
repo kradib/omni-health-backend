@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -97,6 +98,20 @@ public interface UserAppointmentScheduleRepository extends JpaRepository<UserApp
      @Param("doctorId") Long doctorId,
      Pageable pageable
      );
+
+
+    @Query("SELECT COUNT(u) FROM UserAppointmentSchedule u " +
+            "WHERE u.slotId = :slotId " +
+            "AND FUNCTION('DATE', u.appointmentDateTime) = :appointmentDate " +
+            "AND u.username = :username " +
+            "AND u.doctorDetail.id = :doctorId " +
+            "AND u.appointmentStatus != \"cancelled\"")
+    long countBySlotIdDateUsernameAndDoctor(
+            @Param("slotId") int slotId,
+            @Param("appointmentDate") LocalDate appointmentDate,
+            @Param("username") String username,
+            @Param("doctorId") Long doctorId);
+
 
 
 

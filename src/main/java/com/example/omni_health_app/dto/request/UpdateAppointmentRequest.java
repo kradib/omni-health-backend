@@ -9,4 +9,5 @@ import java.time.LocalDateTime;
 @Builder
 public class UpdateAppointmentRequest {
     private LocalDateTime appointmentDateTime;
+    private int slotId;
 }

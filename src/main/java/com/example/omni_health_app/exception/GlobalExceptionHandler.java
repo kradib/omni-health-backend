@@ -10,9 +10,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import java.util.List;
 
-import static com.example.omni_health_app.exception.ErrorCode.BAD_REQUEST_WRONG_AUTH_ERROR;
-import static com.example.omni_health_app.exception.ErrorCode.BAD_REQUEST_WRONG_INPUT_ERROR;
-import static com.example.omni_health_app.exception.ErrorCode.INTERNAL_FAILURE_ERROR;
+import static com.example.omni_health_app.exception.ErrorCode.*;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -39,6 +37,19 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ErrorResponse.builder()
+                .responseMetadata(responseMetadata)
+                .build());
+    }
+
+    @ExceptionHandler(AppointmentAlreadyExistsException.class)
+    public ResponseEntity<ResponseWrapper<ErrorResponseData>> handleAppointmentAlreadyExistsException(AppointmentAlreadyExistsException ex) {
+        ResponseMetadata responseMetadata = ResponseMetadata.builder()
+                .statusCode(HttpStatus.CONFLICT.value())
+                .errors(List.of(ex.getMessage()))
+                .errorCode(BAD_REQUEST_CONFLICT_APPOINTMENT_SAME_USER)
+                .build();
+
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(ErrorResponse.builder()
                 .responseMetadata(responseMetadata)
                 .build());
     }

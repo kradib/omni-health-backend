@@ -31,6 +31,9 @@ public class UserAppointmentSchedule {
     @Column(nullable = true)
     private String prescription;
 
+    @Column(nullable = false)
+    private int slotId;
+
     @ManyToOne(optional = false, fetch = FetchType.EAGER)
     @JoinColumn(name = "user_detail_id", referencedColumnName = "id")
     private UserDetail userDetail;

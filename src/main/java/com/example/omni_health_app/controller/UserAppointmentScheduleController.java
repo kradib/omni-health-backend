@@ -4,13 +4,13 @@ import com.example.omni_health_app.dto.request.CancelAppointmentRequest;
 import com.example.omni_health_app.dto.request.CreateAppointmentRequest;
 import com.example.omni_health_app.dto.request.UpdateAppointmentRequest;
 import com.example.omni_health_app.dto.response.*;
+import com.example.omni_health_app.exception.AppointmentAlreadyExistsException;
 import com.example.omni_health_app.exception.BadRequestException;
 import com.example.omni_health_app.service.UserAppointmentScheduleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -33,7 +33,7 @@ public class UserAppointmentScheduleController {
     @PostMapping
     @PreAuthorize("hasRole('ROLE_PATIENT')") 
     public ResponseEntity<ResponseWrapper<CreateAppointmentResponseData>> createAppointmentSchedule
-            (@RequestBody CreateAppointmentRequest createAppointmentRequest) throws BadRequestException {
+            (@RequestBody CreateAppointmentRequest createAppointmentRequest) throws BadRequestException, AppointmentAlreadyExistsException {
         final String userName = getCurrentUsername();
         log.info("Receive appointment schedule request {} for {}", createAppointmentRequest, userName);
 
