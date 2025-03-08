@@ -1,10 +1,7 @@
 package com.example.omni_health_app.controller;
 
 
-import com.example.omni_health_app.dto.request.ForgotPasswordRequest;
-import com.example.omni_health_app.dto.request.ResetPasswordRequest;
-import com.example.omni_health_app.dto.request.UserSignInRequest;
-import com.example.omni_health_app.dto.request.UserSignUpRequest;
+import com.example.omni_health_app.dto.request.*;
 import com.example.omni_health_app.dto.response.*;
 import com.example.omni_health_app.exception.UserAuthException;
 import com.example.omni_health_app.service.UserAuthService;
@@ -13,16 +10,15 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import static com.example.omni_health_app.util.UserNameUtil.getCurrentUsername;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/user")
 @Slf4j
-public class UserController {
+public class UserAuthController {
 
     private final UserAuthService userAuthService;
 
@@ -40,6 +36,22 @@ public class UserController {
                 .build();
         return ResponseEntity.ok(responseWrapper);
 
+    }
+
+    @PatchMapping
+    public ResponseEntity<ResponseWrapper<UserUpdateResponseData>> updateProfile(@RequestBody @NonNull UserDetailsUpdateRequest request) throws UserAuthException {
+        final String userName = getCurrentUsername();
+        log.info("Receive user update up request {} for {}", request, userName);
+        final ResponseWrapper<UserUpdateResponseData> responseWrapper = UserUpdateResponse.builder()
+                .data(UserUpdateResponseData.builder()
+                        .userDetail(userAuthService.updateUserDetails(userName, request))
+                        .build())
+                .responseMetadata(ResponseMetadata.builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .errorCode(0)
+                        .build())
+                .build();
+        return ResponseEntity.ok(responseWrapper);
     }
 
     @PostMapping("/signin")

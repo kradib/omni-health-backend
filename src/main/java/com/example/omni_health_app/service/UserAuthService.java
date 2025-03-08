@@ -3,6 +3,7 @@ package com.example.omni_health_app.service;
 import com.example.omni_health_app.domain.entity.UserAuth;
 import com.example.omni_health_app.domain.entity.UserDetail;
 import com.example.omni_health_app.domain.repositories.UserAuthRepository;
+import com.example.omni_health_app.dto.request.UserDetailsUpdateRequest;
 import com.example.omni_health_app.dto.request.UserSignInRequest;
 import com.example.omni_health_app.dto.request.UserSignUpRequest;
 import com.example.omni_health_app.dto.response.UserSignInResponseData;
@@ -10,6 +11,7 @@ import com.example.omni_health_app.exception.UserAuthException;
 import com.example.omni_health_app.util.TokenUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.catalina.User;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -64,6 +66,45 @@ public class UserAuthService {
         UserAuth savedUser = userAuthRepository.save(userAuth);
         log.info("Successfully registered user {}", savedUser.getUserDetail());
         return userAuth.getUsername();
+    }
+
+    public UserDetail updateUserDetails(String userName, UserDetailsUpdateRequest request) throws UserAuthException {
+        if (!userAuthRepository.existsByUsername(userName)) {
+            throw new UserAuthException("User does not exist");
+        }
+
+        boolean validFirstGuardianUserId = userAuthRepository.existsByUsername(request.getFirstGuardianUserId());
+        boolean validSecondGuardianUserId = userAuthRepository.existsByUsername(request.getSecondGuardianUserId());
+        log.info("the validity of userid {} is {}, userId {} is {}",
+                request.getFirstGuardianUserId(), validFirstGuardianUserId,
+                request.getSecondGuardianUserId(), validSecondGuardianUserId);
+
+        final UserAuth userAuth = userAuthRepository.findByUsername(userName).get();
+        final UserDetail userDetail = userAuth.getUserDetail();
+
+        if (request.getEmailId() != null) {
+            userDetail.setEmail(request.getEmailId());
+        }
+        if (request.getFirstName() != null) {
+            userDetail.setFirstName(request.getFirstName());
+        }
+        if (request.getLastName() != null) {
+            userDetail.setLastName(request.getLastName());
+        }
+        if (request.getPhoneNumber() != null) {
+            userDetail.setPhoneNumber(request.getPhoneNumber());
+        }
+        if (validFirstGuardianUserId) {
+            userDetail.setFirstGuardianUserId(request.getFirstGuardianUserId());
+        }
+        if (validSecondGuardianUserId) {
+            userDetail.setSecondGuardianUserId(request.getSecondGuardianUserId());
+        }
+        userAuth.setUserDetail(userDetail);
+        userAuthRepository.save(userAuth);
+
+        log.info("Successfully updated user {}", userDetail);
+        return userDetail;
     }
 
 

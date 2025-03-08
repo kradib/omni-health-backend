@@ -80,7 +80,8 @@ public interface UserAppointmentScheduleRepository extends JpaRepository<UserApp
             @Param("status") String status);
 
 
-    @Query("SELECT u FROM UserAppointmentSchedule u WHERE u.appointmentStatus != \"cancelled\" AND u.appointmentDateTime BETWEEN :startDateTime" +
+    @Query("SELECT u FROM UserAppointmentSchedule u WHERE u.appointmentStatus = \"confirmed\" AND u" +
+            ".appointmentDateTime BETWEEN :startDateTime" +
             " AND :endDateTime")
     List<UserAppointmentSchedule> findPendingAppointments(LocalDateTime startDateTime, LocalDateTime endDateTime);
 

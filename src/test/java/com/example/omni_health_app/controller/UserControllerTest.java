@@ -2,7 +2,6 @@ package com.example.omni_health_app.controller;
 
 import com.example.omni_health_app.dto.request.ForgotPasswordRequest;
 import com.example.omni_health_app.dto.request.ResetPasswordRequest;
-import com.example.omni_health_app.dto.request.UserSignInRequest;
 import com.example.omni_health_app.dto.request.UserSignUpRequest;
 import com.example.omni_health_app.dto.response.*;
 import com.example.omni_health_app.exception.UserAuthException;
@@ -23,7 +22,7 @@ import static org.mockito.Mockito.when;
 public class UserControllerTest {
 
     @InjectMocks
-    private UserController userController;
+    private UserAuthController userController;
 
     @Mock
     private UserAuthService userAuthService;
