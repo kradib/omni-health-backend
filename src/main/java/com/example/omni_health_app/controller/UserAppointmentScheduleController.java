@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static com.example.omni_health_app.util.UserNameUtil.getCurrentUsername;
@@ -38,6 +39,25 @@ public class UserAppointmentScheduleController {
 
         final ResponseWrapper<CreateAppointmentResponseData> responseWrapper = CreateAppointmentResponse.builder()
                 .data(userAppointmentScheduleService.createAppointmentSchedule(userName, createAppointmentRequest))
+                .responseMetadata(ResponseMetadata.builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .errorCode(0)
+                        .build())
+                .build();
+        return ResponseEntity.ok(responseWrapper);
+
+    }
+
+    @GetMapping("/slots")
+    public ResponseEntity<ResponseWrapper<GetAllAppointmentSlotsResponseData>> getAllAppointmentSlots
+            (@RequestParam("doctorId") long doctorId, @RequestParam("appointmentDate") LocalDate appointmentDate) throws BadRequestException {
+        log.info("Receive getAppointmentSlots schedule request for doctor {} for {}", doctorId,
+                appointmentDate);
+        final ResponseWrapper<GetAllAppointmentSlotsResponseData> responseWrapper = GetAllAppointmentSlotsResponse.builder()
+                .data(GetAllAppointmentSlotsResponseData.builder()
+                        .appointmentSlotAvailableList(userAppointmentScheduleService.getAppointmentSlotsPerDoctor(doctorId, appointmentDate))
+                        .build()
+                )
                 .responseMetadata(ResponseMetadata.builder()
                         .statusCode(HttpStatus.OK.value())
                         .errorCode(0)

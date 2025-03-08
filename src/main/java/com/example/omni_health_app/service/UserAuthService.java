@@ -48,7 +48,7 @@ public class UserAuthService {
                 request.getFirstGuardianUserId(), validFirstGuardianUserId, request.getSecondGuardianUserId(), validSecondGuardianUserId);
 
         final UserDetail userDetail = UserDetail.builder()
-                .email(request.getEmailId())
+                .email(request.getEmail())
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .phoneNumber(request.getPhoneNumber())

@@ -38,7 +38,7 @@ public class UserControllerTest {
         UserSignUpRequest request = UserSignUpRequest.builder()
                 .username("testUser")
                 .password("password")
-                .emailId("test@example.com")
+                .email("test@example.com")
                 .firstName("John")
                 .lastName("Doe")
                 .build();

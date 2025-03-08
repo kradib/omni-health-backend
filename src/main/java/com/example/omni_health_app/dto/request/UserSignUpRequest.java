@@ -16,7 +16,7 @@ public class UserSignUpRequest {
     @NonNull
     private String lastName;
     @NonNull
-    private String emailId;
+    private String email;
     private String phoneNumber;
     private String firstGuardianUserId;
     private String secondGuardianUserId;

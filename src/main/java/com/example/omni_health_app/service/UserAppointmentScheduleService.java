@@ -1,12 +1,17 @@
 package com.example.omni_health_app.service;
 
+import com.example.omni_health_app.calculator.AppointmentSlotCountCalculator;
+import com.example.omni_health_app.domain.entity.AppointmentSlot;
 import com.example.omni_health_app.domain.entity.UserAppointmentSchedule;
 import com.example.omni_health_app.domain.entity.UserAuth;
 import com.example.omni_health_app.domain.entity.UserDetail;
+import com.example.omni_health_app.domain.model.AppointmentSlotCounts;
 import com.example.omni_health_app.domain.model.AppointmentStatus;
+import com.example.omni_health_app.domain.repositories.AppointmentSlotRepository;
 import com.example.omni_health_app.domain.repositories.UserAppointmentScheduleRepository;
 import com.example.omni_health_app.domain.repositories.UserAuthRepository;
 import com.example.omni_health_app.domain.repositories.UserDetailsRepository;
+import com.example.omni_health_app.dto.model.AppointmentSlotAvailable;
 import com.example.omni_health_app.dto.request.CancelAppointmentRequest;
 import com.example.omni_health_app.dto.request.CreateAppointmentRequest;
 import com.example.omni_health_app.dto.request.UpdateAppointmentRequest;
@@ -19,11 +24,10 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -33,6 +37,18 @@ public class UserAppointmentScheduleService {
     private final UserAppointmentScheduleRepository userAppointmentScheduleRepository;
     private final UserAuthRepository userAuthRepository;
     private final UserDetailsRepository userDetailsRepository;
+    private final AppointmentSlotRepository appointmentSlotRepository;
+    private final AppointmentSlotCountCalculator appointmentSlotCountCalculator;
+
+    public List<AppointmentSlotAvailable> getAppointmentSlotsPerDoctor(final long doctorId,
+                                                                            final LocalDate date) throws BadRequestException {
+        final Optional<UserDetail> doctorDetails = userDetailsRepository.findById(doctorId);
+        if(doctorDetails.isEmpty()) {
+            throw new BadRequestException(String.format("doctor with id %s does not exists", doctorId));
+        }
+        return appointmentSlotCountCalculator.calculateAvailableSlot(
+                appointmentSlotRepository.getAppointmentSlotCountsByDocAndDate(doctorId, date));
+    }
 
 
     public CreateAppointmentResponseData createAppointmentSchedule( final String userName, CreateAppointmentRequest dto) throws BadRequestException {

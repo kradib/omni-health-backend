@@ -54,7 +54,7 @@ public class UserAuthServiceTest {
         UserSignUpRequest request = UserSignUpRequest.builder()
                 .username("testUser")
                 .password("password")
-                .emailId("test@example.com")
+                .email("test@example.com")
                 .firstName("John")
                 .lastName("Doe")
                 .phoneNumber("1234567890")
@@ -77,7 +77,7 @@ public class UserAuthServiceTest {
                 .username("testUser")
                 .password("password")
                 .lastName("bar")
-                .emailId("test@gmail.com")
+                .email("test@gmail.com")
                 .build();
 
         when(userAuthRepository.existsByUsername(eq(request.getUsername()))).thenReturn(true);
