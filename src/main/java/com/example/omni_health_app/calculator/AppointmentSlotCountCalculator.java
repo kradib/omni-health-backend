@@ -18,7 +18,7 @@ public class AppointmentSlotCountCalculator {
     private static final Map<Integer, Slot> slot_mapping = Map.of(
             1, Slot.builder()
                     .id(1)
-                    .time("9:00 AM")
+                    .time("09:00 AM")
                     .build(),
             2, Slot.builder()
                     .id(2)
@@ -34,19 +34,23 @@ public class AppointmentSlotCountCalculator {
                     .build(),
             5, Slot.builder()
                     .id(5)
-                    .time("1:00 PM")
+                    .time("01:00 PM")
                     .build(),
             6, Slot.builder()
                     .id(6)
-                    .time("2:00 PM")
+                    .time("02:00 PM")
                     .build(),
             7, Slot.builder()
                     .id(7)
-                    .time("3:00 PM")
+                    .time("03:00 PM")
                     .build(),
             8, Slot.builder()
                     .id(8)
-                    .time("4:00 PM")
+                    .time("04:00 PM")
+                    .build(),
+            9, Slot.builder()
+                    .id(9)
+                    .time("05:00 PM")
                     .build());
 
     @Value("${omni.slot-booking}")
