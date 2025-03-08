@@ -10,4 +10,5 @@ import java.time.LocalDateTime;
 public class CreateAppointmentRequest {
     private LocalDateTime appointmentDateTime;
     private Long doctorId;
+    private int slot_id;
 }
