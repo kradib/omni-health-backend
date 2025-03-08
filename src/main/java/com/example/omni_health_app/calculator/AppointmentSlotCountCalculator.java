@@ -8,7 +8,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 @Slf4j
@@ -56,7 +61,10 @@ public class AppointmentSlotCountCalculator {
     @Value("${omni.slot-booking}")
     private Integer availableSlots;
 
-    public List<AppointmentSlotAvailable> calculateAvailableSlot(List<AppointmentSlotCounts> appointmentSlotCounts) {
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("hh:mm a", Locale.ENGLISH);
+
+    public List<AppointmentSlotAvailable> calculateAvailableSlot(List<AppointmentSlotCounts> appointmentSlotCounts,
+                                                                 LocalDate appointmentDate) {
         log.info("appointmentSlotCounts: {}", appointmentSlotCounts);
         final List<AppointmentSlotAvailable> appointmentSlotAvailableList = new LinkedList<>();
         slot_mapping.keySet().forEach(slotId -> {
@@ -76,8 +84,14 @@ public class AppointmentSlotCountCalculator {
             }
         });
         appointmentSlotAvailableList.sort(Comparator.comparingInt(o -> o.getSlot().getId()));
-
-        return appointmentSlotAvailableList;
+        if(appointmentDate.isAfter(LocalDate.now())) {
+            return appointmentSlotAvailableList;
+        } else {
+            return appointmentSlotAvailableList.stream().filter(slot -> {
+                LocalTime slotTime = LocalTime.parse(slot.getSlot().getTime().trim(), formatter);
+                return slotTime.isAfter(LocalTime.now());
+            }).toList();
+        }
     }
 
 

@@ -47,7 +47,7 @@ public class UserAppointmentScheduleService {
             throw new BadRequestException(String.format("doctor with id %s does not exists", doctorId));
         }
         return appointmentSlotCountCalculator.calculateAvailableSlot(
-                appointmentSlotRepository.getAppointmentSlotCountsByDocAndDate(doctorId, date));
+                appointmentSlotRepository.getAppointmentSlotCountsByDocAndDate(doctorId, date), date);
     }
 
 
