@@ -9,6 +9,7 @@ public interface UserDetailsRepository extends JpaRepository<UserDetail, Long> {
 
     @Query("SELECT ud FROM UserDetail ud JOIN ud.userAuth ua WHERE ua.username = :username")
     UserDetail findByUsername(String username);
-    boolean existsByEmail(String username);
+    boolean existsByEmail(String email);
+    boolean existsByPhoneNumber(String phoneNumber);
 
 }

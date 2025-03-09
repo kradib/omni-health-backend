@@ -88,7 +88,7 @@ public class AdminService {
                 .orElseThrow(() -> new UserAuthException("User not found"));
 
         // Update fields if present in request
-        if (request.getEmailId() != null) existingUser.getUserDetail().setEmail(request.getEmailId());
+        if (request.getEmail() != null) existingUser.getUserDetail().setEmail(request.getEmail());
         if (request.getFirstName() != null) existingUser.getUserDetail().setFirstName(request.getFirstName());
         if (request.getLastName() != null) existingUser.getUserDetail().setLastName(request.getLastName());
         if (request.getPhoneNumber() != null) existingUser.getUserDetail().setPhoneNumber(request.getPhoneNumber());

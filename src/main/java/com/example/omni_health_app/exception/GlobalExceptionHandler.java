@@ -8,6 +8,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import java.sql.SQLException;
 import java.util.List;
 
 import static com.example.omni_health_app.exception.ErrorCode.*;
@@ -54,11 +56,26 @@ public class GlobalExceptionHandler {
                 .build());
     }
 
+    @ExceptionHandler(SQLException.class)
+    public ResponseEntity<ResponseWrapper<ErrorResponseData>> handleSqlException(SQLException ex) {
+        ResponseMetadata responseMetadata = ResponseMetadata.builder()
+                .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
+                .errors(List.of("Something went wrong at our side when we process your data, please reach out to us " +
+                        "if you see it again"))
+                .errorCode(INTERNAL_FAILURE_SQL_ERROR)
+                .build();
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.builder()
+                .responseMetadata(responseMetadata)
+                .build());
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ResponseWrapper<ErrorResponseData>> handleGeneralException(Exception ex) {
         ResponseMetadata responseMetadata = ResponseMetadata.builder()
                 .statusCode(HttpStatus.INTERNAL_SERVER_ERROR.value())
-                .errors(List.of(ex.getMessage()))
+                .errors(List.of("Something went wrong at our side when we process your request, please reach out to " +
+                        "us if you see it again"))
                 .errorCode(INTERNAL_FAILURE_ERROR)
                 .build();
 

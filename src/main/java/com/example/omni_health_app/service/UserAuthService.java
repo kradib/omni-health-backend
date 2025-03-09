@@ -3,6 +3,7 @@ package com.example.omni_health_app.service;
 import com.example.omni_health_app.domain.entity.UserAuth;
 import com.example.omni_health_app.domain.entity.UserDetail;
 import com.example.omni_health_app.domain.repositories.UserAuthRepository;
+import com.example.omni_health_app.domain.repositories.UserDetailsRepository;
 import com.example.omni_health_app.dto.request.UserDetailsUpdateRequest;
 import com.example.omni_health_app.dto.request.UserSignInRequest;
 import com.example.omni_health_app.dto.request.UserSignUpRequest;
@@ -30,6 +31,7 @@ public class UserAuthService {
 
 
     private final UserAuthRepository userAuthRepository;
+    private final UserDetailsRepository userDetailsRepository;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -41,6 +43,13 @@ public class UserAuthService {
         if (userAuthRepository.existsByUsername(request.getUsername())) {
             throw new UserAuthException("Username is already taken");
         }
+        if (userDetailsRepository.existsByEmail(request.getEmail())) {
+            throw new UserAuthException("Email Id belongs to another user");
+        }
+        if (userDetailsRepository.existsByPhoneNumber(request.getPhoneNumber())) {
+            throw new UserAuthException("Phone Number belongs to another user");
+        }
+
 
         boolean validFirstGuardianUserId = userAuthRepository.existsByUsername(request.getFirstGuardianUserId());
         boolean validSecondGuardianUserId = userAuthRepository.existsByUsername(request.getSecondGuardianUserId());
@@ -72,6 +81,12 @@ public class UserAuthService {
         if (!userAuthRepository.existsByUsername(userName)) {
             throw new UserAuthException("User does not exist");
         }
+        if (userDetailsRepository.existsByEmail(request.getEmail())) {
+            throw new UserAuthException("Email Id belongs to another user");
+        }
+        if (userDetailsRepository.existsByPhoneNumber(request.getPhoneNumber())) {
+            throw new UserAuthException("Phone Number belongs to another user");
+        }
 
         boolean validFirstGuardianUserId = userAuthRepository.existsByUsername(request.getFirstGuardianUserId());
         boolean validSecondGuardianUserId = userAuthRepository.existsByUsername(request.getSecondGuardianUserId());
@@ -82,8 +97,8 @@ public class UserAuthService {
         final UserAuth userAuth = userAuthRepository.findByUsername(userName).get();
         final UserDetail userDetail = userAuth.getUserDetail();
 
-        if (request.getEmailId() != null) {
-            userDetail.setEmail(request.getEmailId());
+        if (request.getEmail() != null) {
+            userDetail.setEmail(request.getEmail());
         }
         if (request.getFirstName() != null) {
             userDetail.setFirstName(request.getFirstName());
@@ -94,10 +109,10 @@ public class UserAuthService {
         if (request.getPhoneNumber() != null) {
             userDetail.setPhoneNumber(request.getPhoneNumber());
         }
-        if (validFirstGuardianUserId) {
+        if (validFirstGuardianUserId && userDetail.getFirstGuardianUserId() == null) {
             userDetail.setFirstGuardianUserId(request.getFirstGuardianUserId());
         }
-        if (validSecondGuardianUserId) {
+        if (validSecondGuardianUserId && userDetail.getSecondGuardianUserId() == null) {
             userDetail.setSecondGuardianUserId(request.getSecondGuardianUserId());
         }
         userAuth.setUserDetail(userDetail);

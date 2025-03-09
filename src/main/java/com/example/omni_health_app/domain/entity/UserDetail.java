@@ -17,7 +17,9 @@ public class UserDetail {
 
     private String firstName;
     private String lastName;
+    @Column(unique = true, nullable = false)
     private String email;
+    @Column(unique = true, nullable = false)
     private String phoneNumber;
     private String firstGuardianUserId;
     private String secondGuardianUserId;
