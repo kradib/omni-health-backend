@@ -19,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.Random;
 import java.util.UUID;
 
 import static com.example.omni_health_app.util.Constants.CACHE_NAME;
@@ -141,11 +142,12 @@ public class UserAuthService {
         Optional<UserAuth> userOptional = userAuthRepository.findByUsername(userName);
         if (userOptional.isPresent()) {
             UserAuth userAuth = userOptional.get();
-            String resetToken = UUID.randomUUID().toString();
+            Random random = new Random();
+            int otp = 1000 + random.nextInt(9000);
             Cache cache = cacheManager.getCache(CACHE_NAME);
-            cache.put(resetToken, userAuth.getUsername());
+            cache.put(Integer.toString(otp), userAuth.getUsername());
             notificationService.sendNotification(userAuth.getUserDetail().getEmail(), "Password Reset Request",
-                    "Use this code to reset your password: " + resetToken);
+                    "Use this code to reset your password: " + otp);
         }
     }
 
