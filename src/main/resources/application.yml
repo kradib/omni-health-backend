@@ -43,3 +43,7 @@ aws:
     bucket-name: ${S3_BUCKET_NAME:omni-health-bucket}
   region: ${AWS_REGION:us-east-1}
   endpoint: ${AWS_ENDPOINT_URL:http://localhost:4566}
+
+server:
+  address: 0.0.0.0
+  port: 8080

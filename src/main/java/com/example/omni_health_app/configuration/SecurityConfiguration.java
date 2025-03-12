@@ -12,6 +12,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.cors.CorsConfiguration;
+
+import java.util.List;
 
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 @Configuration
@@ -28,7 +31,15 @@ public class SecurityConfiguration {
         http
                 .csrf()
                 .disable()
-                .cors().disable()// Disable CSRF for simplicity in development
+                .cors(cors -> cors.configurationSource(request -> {
+                    CorsConfiguration config = new CorsConfiguration();
+                    config.setAllowedOrigins(List.of("http://192.168.29.234:5173")); // use your PC IP address
+                    config.setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE", "OPTIONS"));
+                    config.setAllowedHeaders(List.of("*"));
+                    config.setExposedHeaders(List.of("Content-Disposition"));
+                    config.setAllowCredentials(true);
+                    return config;
+                }))
                 .authorizeHttpRequests()
                 .requestMatchers(HttpMethod.OPTIONS).permitAll()
                 .requestMatchers("/api/v1/user/signup").permitAll() // Allow signup and signin
