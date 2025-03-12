@@ -91,6 +91,7 @@ public class UserAppointmentScheduleService {
                 .build();
 
     }
+
     @Transactional
     public CancelAppointmentResponseData cancelAppointmentSchedule(final String userName, CancelAppointmentRequest dto) throws BadRequestException {
         final Optional<UserAuth> userAuthOptional = userAuthRepository.findByUsername(userName);
@@ -139,7 +140,7 @@ public class UserAppointmentScheduleService {
         LocalDate previousAppointmentDate = userAppointmentSchedule.getAppointmentDateTime().toLocalDate();
         int previousAppointmentSlot = userAppointmentSchedule.getSlotId();
 
-        userAppointmentSchedule.setAppointmentStatus(AppointmentStatus.UPDATED.getStatus());
+        //userAppointmentSchedule.setAppointmentStatus(AppointmentStatus.UPDATED.getStatus());
         userAppointmentSchedule.setAppointmentDateTime(dto.getAppointmentDateTime());
         userAppointmentSchedule.setSlotId(dto.getSlotId());
 
