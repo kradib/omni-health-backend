@@ -13,6 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
@@ -35,6 +36,7 @@ public class DocumentUploadController {
     private final DocumentService documentService;
 
     @PostMapping("/upload")
+    @PreAuthorize("hasRole('ROLE_PATIENT')")
     public ResponseEntity<ResponseWrapper<UploadDocumentResponseData>> uploadFile(@RequestParam("file") MultipartFile file, @RequestParam("documentName") String documentName)
             throws BadRequestException, IOException {
 
@@ -53,6 +55,7 @@ public class DocumentUploadController {
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ROLE_PATIENT')")
     public ResponseEntity<ResponseWrapper<GetAllDocumentsResponseData>> getDocuments() throws BadRequestException {
 
         final String userName = getCurrentUsername();
@@ -71,6 +74,7 @@ public class DocumentUploadController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasRole('ROLE_PATIENT')")
     public ResponseEntity<InputStreamResource> downloadDocument(@PathVariable("id") final int id) throws BadRequestException,
             IOException, UserAuthException {
 

@@ -8,9 +8,10 @@ import java.util.stream.Collectors;
 import com.example.omni_health_app.domain.entity.UserAuth;
 import com.example.omni_health_app.domain.entity.UserDetail;
 import com.example.omni_health_app.domain.model.AppointmentStatus;
+import com.example.omni_health_app.domain.repositories.DocumentRepository;
 import com.example.omni_health_app.domain.repositories.UserAuthRepository;
-import com.example.omni_health_app.dto.response.GetAllAppointmentResponseData;
-import com.example.omni_health_app.dto.response.UserDetailWithRoles;
+import com.example.omni_health_app.dto.response.*;
+import com.example.omni_health_app.exception.UserAuthException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -20,7 +21,6 @@ import org.springframework.stereotype.Service;
 import com.example.omni_health_app.domain.entity.UserAppointmentSchedule;
 import com.example.omni_health_app.domain.repositories.UserAppointmentScheduleRepository;
 import com.example.omni_health_app.dto.request.UpdateAppointmentStatusRequest;
-import com.example.omni_health_app.dto.response.UpdateAppointmentResponseData;
 import com.example.omni_health_app.exception.BadRequestException;
 
 import lombok.RequiredArgsConstructor;
@@ -33,6 +33,7 @@ import static com.example.omni_health_app.util.Constants.DOCTOR_ROLE;
 public class DoctorService {
     private final UserAppointmentScheduleRepository userAppointmentScheduleRepository;
     private final UserAuthRepository userAuthRepository;
+    private final DocumentRepository documentRepository;
 
      public UpdateAppointmentResponseData updateAppointmentScheduleStatus(final String userName, Long appointmentId,
                                                                    UpdateAppointmentStatusRequest dto) throws BadRequestException {
@@ -98,6 +99,23 @@ public class DoctorService {
         return users.stream()
                 .map(UserAuth::getUserDetail)
                 .collect(Collectors.toList());
+    }
+
+    public List<DocumentMetadata> getAllDocuments(final long appointmentId, final String doctorUserName) throws BadRequestException, UserAuthException {
+         Optional<UserAppointmentSchedule> userAppointmentScheduleOptional =
+                 userAppointmentScheduleRepository.findById(appointmentId);
+         if(userAppointmentScheduleOptional.isEmpty()) {
+             throw new BadRequestException("Appointment does not exist");
+         }
+         if(!userAppointmentScheduleOptional.get().getDoctorDetail().getUserAuth().getUsername().equals(doctorUserName)) {
+             throw new UserAuthException("Doctor does not have enough permision to view this appointment documents");
+         }
+        return documentRepository.findByUserName(userAppointmentScheduleOptional.get().getUsername())
+                .stream().map(documentEntity -> DocumentMetadata.builder()
+                .id(documentEntity.getId())
+                .documentName(documentEntity.getDocumentName())
+                .dateUploaded(documentEntity.getDateUploaded())
+                .build()).toList();
     }
 
 

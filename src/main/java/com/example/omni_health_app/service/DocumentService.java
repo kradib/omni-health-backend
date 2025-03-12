@@ -1,8 +1,10 @@
 package com.example.omni_health_app.service;
 
 import com.example.omni_health_app.domain.entity.DocumentEntity;
+import com.example.omni_health_app.domain.entity.UserAppointmentSchedule;
 import com.example.omni_health_app.domain.entity.UserAuth;
 import com.example.omni_health_app.domain.repositories.DocumentRepository;
+import com.example.omni_health_app.domain.repositories.UserAppointmentScheduleRepository;
 import com.example.omni_health_app.domain.repositories.UserAuthRepository;
 import com.example.omni_health_app.dto.response.DocumentMetadata;
 import com.example.omni_health_app.dto.response.DownloadDocumentResponseData;
@@ -44,6 +46,7 @@ public class DocumentService {
     private static final String BASE_UPLOAD_DIR = "/var/uploads/";
     private final DocumentRepository documentRepository;
     private final UserAuthRepository userAuthRepository;
+    private final UserAppointmentScheduleRepository userAppointmentScheduleRepository;
 
 
     public DocumentMetadata uploadFile(MultipartFile file, String userName, String documentName)
@@ -112,6 +115,19 @@ public class DocumentService {
             throw new BadRequestException("document does not exist");
         }
         return documentEntityOptional.get();
+    }
+
+    public DocumentEntity getDocument(String doctorUserName, long appointmentId, long documentId) throws BadRequestException,
+            UserAuthException, IOException {
+        Optional<UserAppointmentSchedule> userAppointmentScheduleOptional =
+                userAppointmentScheduleRepository.findById(appointmentId);
+        if(userAppointmentScheduleOptional.isEmpty()) {
+            throw new BadRequestException("Appointment does not exist");
+        }
+        if(!userAppointmentScheduleOptional.get().getDoctorDetail().getUserAuth().getUsername().equals(doctorUserName)) {
+            throw new UserAuthException("Doctor does not have enough permission to view this appointment documents");
+        }
+        return getDocument(userAppointmentScheduleOptional.get().getUsername(), documentId);
     }
 
     private String getFileExtension(String filename) {
