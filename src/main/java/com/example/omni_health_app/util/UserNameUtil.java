@@ -21,4 +21,15 @@ public class UserNameUtil {
         }
         return null;
     }
+
+    public static String getCurrentUserRole() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication != null) {
+            for (GrantedAuthority authority : authentication.getAuthorities()) {
+                return authority.getAuthority();
+            }
+        }
+        return null;
+    }
 }

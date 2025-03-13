@@ -60,34 +60,6 @@ public class DoctorController {
 
     }
 
-    @GetMapping("/appointments")
-    @PreAuthorize("hasRole('ROLE_DOCTOR')")
-    public ResponseEntity<ResponseWrapper<GetAllAppointmentResponseData>> getAppointments(
-            @RequestParam(value = "startDate", required = false) String startDate,
-            @RequestParam(value = "endDate", required = false) String endDate,
-            @RequestParam(value = "status", defaultValue = "created") String status,
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size) throws BadRequestException {
-        final String userName = getCurrentUsername();
-        log.info("Receive get all dependent appointments from {} to {} for {} with status {}", startDate, endDate,
-                userName, status);
-        final Pageable pageable = PageRequest.of(page, size);
-
-        final ResponseWrapper<GetAllAppointmentResponseData> responseWrapper = GetAllAppointmentResponse.builder()
-                .data(doctorService.getAllAppointmentSchedule(userName,
-                        startDate == null? null : LocalDateTime.parse(startDate),
-                        endDate == null ? null : LocalDateTime.parse(endDate),
-                        status,
-                        pageable))
-                .responseMetadata(ResponseMetadata.builder()
-                        .statusCode(HttpStatus.OK.value())
-                        .errorCode(0)
-                        .build())
-                .build();
-        return ResponseEntity.ok(responseWrapper);
-
-    }
-
     @GetMapping("/appointments/{appointmentId}/documents")
     @PreAuthorize("hasRole('ROLE_DOCTOR')")
     public ResponseEntity<ResponseWrapper<GetAllDocumentsResponseData>> getAppointmentDocuments(

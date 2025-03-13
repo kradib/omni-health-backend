@@ -1,11 +1,7 @@
 package com.example.omni_health_app.controller;
 
 
-import com.example.omni_health_app.dto.request.ForgotPasswordRequest;
-import com.example.omni_health_app.dto.request.ResetPasswordRequest;
-import com.example.omni_health_app.dto.request.UpdateUserRequest;
-import com.example.omni_health_app.dto.request.UserSignInRequest;
-import com.example.omni_health_app.dto.request.AddUserRequest;
+import com.example.omni_health_app.dto.request.*;
 import com.example.omni_health_app.dto.response.*;
 import com.example.omni_health_app.exception.BadRequestException;
 import com.example.omni_health_app.exception.UserAuthException;
@@ -113,7 +109,7 @@ public class AdminController {
 
     @PutMapping("/updateUser/{userId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ResponseWrapper<AddUserResponseData>> updateUser(@PathVariable Long userId, @RequestBody UpdateUserRequest request) throws UserAuthException {
+    public ResponseEntity<ResponseWrapper<AddUserResponseData>> updateUser(@PathVariable Long userId, @RequestBody UserDetailsUpdateRequest request) throws UserAuthException, BadRequestException {
         log.info("Received update user request for userId {}: {}", userId, request);
         final ResponseWrapper<AddUserResponseData> responseWrapper = AddUserResponse.builder()
                 .data(AddUserResponseData.builder()
@@ -157,34 +153,34 @@ public class AdminController {
         return ResponseEntity.ok(responseWrapper);
     }
 
-    @GetMapping("/appointments")
-    @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ResponseWrapper<GetAllAppointmentResponseData>> getAllAppointmentSchedule(
-            @RequestParam(value = "startDate", required = false) String startDate,
-            @RequestParam(value = "endDate", required = false) String endDate,
-            @RequestParam(value = "doctorId", required = false) Long doctorId,
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size) throws BadRequestException {
-
-        log.info("Receive get all appointments from {} to {} for {}", startDate, endDate, doctorId);
-
-        final Pageable pageable = PageRequest.of(page, size);
-
-
-        LocalDateTime startDateTime = (startDate != null && !startDate.isEmpty()) ? LocalDateTime.parse(startDate) : null;
-        LocalDateTime endDateTime = (endDate != null && !endDate.isEmpty()) ? LocalDateTime.parse(endDate) : null;
-
-
-        final ResponseWrapper<GetAllAppointmentResponseData> responseWrapper = GetAllAppointmentResponse.builder()
-                .data(adminService.getAllAppointmentSchedule(doctorId, startDateTime, endDateTime, pageable))
-                .responseMetadata(ResponseMetadata.builder()
-                        .statusCode(HttpStatus.OK.value())
-                        .errorCode(0)
-                        .build())
-                .build();
-
-        return ResponseEntity.ok(responseWrapper);
-    }
+//    @GetMapping("/appointments")
+//    @PreAuthorize("hasRole('ADMIN')")
+//    public ResponseEntity<ResponseWrapper<GetAllAppointmentResponseData>> getAllAppointmentSchedule(
+//            @RequestParam(value = "startDate", required = false) String startDate,
+//            @RequestParam(value = "endDate", required = false) String endDate,
+//            @RequestParam(value = "doctorId", required = false) Long doctorId,
+//            @RequestParam(value = "page", defaultValue = "0") int page,
+//            @RequestParam(value = "size", defaultValue = "10") int size) throws BadRequestException {
+//
+//        log.info("Receive get all appointments from {} to {} for {}", startDate, endDate, doctorId);
+//
+//        final Pageable pageable = PageRequest.of(page, size);
+//
+//
+//        LocalDateTime startDateTime = (startDate != null && !startDate.isEmpty()) ? LocalDateTime.parse(startDate) : null;
+//        LocalDateTime endDateTime = (endDate != null && !endDate.isEmpty()) ? LocalDateTime.parse(endDate) : null;
+//
+//
+//        final ResponseWrapper<GetAllAppointmentResponseData> responseWrapper = GetAllAppointmentResponse.builder()
+//                .data(adminService.getAllAppointmentSchedule(doctorId, startDateTime, endDateTime, pageable))
+//                .responseMetadata(ResponseMetadata.builder()
+//                        .statusCode(HttpStatus.OK.value())
+//                        .errorCode(0)
+//                        .build())
+//                .build();
+//
+//        return ResponseEntity.ok(responseWrapper);
+//    }
 
 
 }

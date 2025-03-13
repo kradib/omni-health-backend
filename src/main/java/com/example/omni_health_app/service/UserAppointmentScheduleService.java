@@ -5,6 +5,7 @@ import com.example.omni_health_app.domain.entity.UserAppointmentSchedule;
 import com.example.omni_health_app.domain.entity.UserAuth;
 import com.example.omni_health_app.domain.entity.UserDetail;
 import com.example.omni_health_app.domain.model.AppointmentStatus;
+import com.example.omni_health_app.domain.model.UserRole;
 import com.example.omni_health_app.domain.repositories.AppointmentSlotRepository;
 import com.example.omni_health_app.domain.repositories.UserAppointmentScheduleRepository;
 import com.example.omni_health_app.domain.repositories.UserAuthRepository;
@@ -28,6 +29,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+
+import static com.example.omni_health_app.domain.model.UserRole.ROLE_ADMIN;
+import static com.example.omni_health_app.domain.model.UserRole.ROLE_PATIENT;
 
 @Service
 @RequiredArgsConstructor
@@ -140,7 +144,7 @@ public class UserAppointmentScheduleService {
         LocalDate previousAppointmentDate = userAppointmentSchedule.getAppointmentDateTime().toLocalDate();
         int previousAppointmentSlot = userAppointmentSchedule.getSlotId();
 
-        //userAppointmentSchedule.setAppointmentStatus(AppointmentStatus.UPDATED.getStatus());
+
         userAppointmentSchedule.setAppointmentDateTime(dto.getAppointmentDateTime());
         userAppointmentSchedule.setSlotId(dto.getSlotId());
 
@@ -161,6 +165,7 @@ public class UserAppointmentScheduleService {
 
     public GetAllAppointmentResponseData getAllAppointmentSchedule(
             final String userName,
+            final UserRole userRole,
             final LocalDateTime startDate,
             final LocalDateTime endDate,
             final String status,
@@ -173,10 +178,72 @@ public class UserAppointmentScheduleService {
             throw new BadRequestException(String.format("User %s does not exist", userName));
         }
         log.info("offset: {}, pageSize: {}", offset, pageSize);
+        return switch (userRole) {
+            case ROLE_PATIENT -> getAllAppointmentScheduleForUsers(userName, startDate, endDate, status, pageSize,
+                    offset, pageable);
+            case ROLE_ADMIN -> getAllAppointmentSchedule(startDate, endDate, status, pageable);
+            case ROLE_DOCTOR ->
+                    getAllAppointmentScheduleForDoctor(userName, startDate, endDate, status, pageSize,
+                            offset, pageable);
+        };
+
+    }
+
+    private GetAllAppointmentResponseData getAllAppointmentScheduleForUsers(final String userName,
+                                                                            final LocalDateTime startDate,
+                                                                            final LocalDateTime endDate,
+                                                                            final String status,
+                                                                            final int pageSize,
+                                                                            final int offset,
+                                                                            final Pageable pageable) {
         final List<UserAppointmentSchedule> appointments =
                 userAppointmentScheduleRepository.findAppointmentsByUserAndDateRange(userName, startDate, endDate,
                         status, pageSize, offset);
         log.info("ownAppointments: {}", appointments);
+        long totalRecords = userAppointmentScheduleRepository.countAppointmentsByUserAndDateRange(userName, startDate
+                , endDate, status);
+        Page<UserAppointmentSchedule> userAppointmentSchedulesPage = new PageImpl<>(appointments, pageable, totalRecords);
+        return GetAllAppointmentResponseData.builder()
+                .success(true)
+                .appointments(appointments)
+                .totalPages(userAppointmentSchedulesPage.getTotalPages())
+                .totalElements(userAppointmentSchedulesPage.getTotalElements())
+                .currentPage(userAppointmentSchedulesPage.getNumber())
+                .build();
+    }
+
+    public GetAllAppointmentResponseData getAllAppointmentSchedule(
+            final LocalDateTime startDate,
+            final LocalDateTime endDate,
+            final String status,
+            final Pageable pageable) {
+        final Page<UserAppointmentSchedule> userAppointmentSchedulesPage =
+                userAppointmentScheduleRepository.findAppointments(startDate, endDate, status, pageable);
+        final List<UserAppointmentSchedule> appointments = userAppointmentSchedulesPage.getContent();
+        return GetAllAppointmentResponseData.builder()
+                .success(true)
+                .appointments(appointments)
+                .totalPages(userAppointmentSchedulesPage.getTotalPages())
+                .totalElements(userAppointmentSchedulesPage.getTotalElements())
+                .currentPage(userAppointmentSchedulesPage.getNumber())
+                .build();
+    }
+
+    private GetAllAppointmentResponseData getAllAppointmentScheduleForDoctor(final String userName,
+                                                                            final LocalDateTime startDate,
+                                                                            final LocalDateTime endDate,
+                                                                            final String status,
+                                                                            final int pageSize,
+                                                                            final int offset,
+                                                                            final Pageable pageable) throws BadRequestException {
+        final Optional<UserAuth> userAuthOptional = userAuthRepository.findByUsername(userName);
+        if (userAuthOptional.isEmpty()) {
+            throw new BadRequestException(String.format("Doctor %s does not exist", userName));
+        }
+        final List<UserAppointmentSchedule> appointments =
+                userAppointmentScheduleRepository.findAppointmentsByDoctor(userAuthOptional.get().getId(), startDate, endDate,
+                        status, pageSize, offset);
+        log.info("Appointments for doctor {}: {}", userName, appointments);
         long totalRecords = userAppointmentScheduleRepository.countAppointmentsByUserAndDateRange(userName, startDate
                 , endDate, status);
         Page<UserAppointmentSchedule> userAppointmentSchedulesPage = new PageImpl<>(appointments, pageable, totalRecords);
@@ -218,7 +285,7 @@ public class UserAppointmentScheduleService {
                 .build();
     }
 
-    public GetAppointmentResponseData getAppointmentSchedule(String userName, Long appointmentId) throws BadRequestException {
+    public GetAppointmentResponseData getAppointmentSchedule(String userName, String userRole, Long appointmentId) throws BadRequestException {
         final Optional<UserAuth> userAuthOptional = userAuthRepository.findByUsername(userName);
         if (userAuthOptional.isEmpty()) {
             throw new BadRequestException(String.format("user %s does not exists", userName));
@@ -229,9 +296,13 @@ public class UserAppointmentScheduleService {
         if (userAppointmentScheduleOptional.isEmpty()) {
             throw new BadRequestException(String.format("Appointment for user %s does not exists", userName));
         }
+        final UserAppointmentSchedule userAppointmentSchedule = userAppointmentScheduleOptional.get();
+        if(ROLE_ADMIN.toString().equals(userRole)) {
+            userAppointmentSchedule.setPrescription(null);
+        }
         return GetAppointmentResponseData.builder()
                 .success(true)
-                .appointmentSchedule(userAppointmentScheduleOptional.get())
+                .appointmentSchedule(userAppointmentSchedule)
                 .build();
     }
 

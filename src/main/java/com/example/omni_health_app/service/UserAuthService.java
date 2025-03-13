@@ -98,24 +98,17 @@ public class UserAuthService {
         final UserAuth userAuth = userAuthRepository.findByUsername(userName).get();
         final UserDetail userDetail = userAuth.getUserDetail();
 
-        if (request.getEmail() != null) {
-            userDetail.setEmail(request.getEmail());
-        }
-        if (request.getFirstName() != null) {
-            userDetail.setFirstName(request.getFirstName());
-        }
-        if (request.getLastName() != null) {
-            userDetail.setLastName(request.getLastName());
-        }
-        if (request.getPhoneNumber() != null) {
-            userDetail.setPhoneNumber(request.getPhoneNumber());
-        }
-        if (validFirstGuardianUserId && userDetail.getFirstGuardianUserId() == null) {
-            userDetail.setFirstGuardianUserId(request.getFirstGuardianUserId());
-        }
-        if (validSecondGuardianUserId && userDetail.getSecondGuardianUserId() == null) {
-            userDetail.setSecondGuardianUserId(request.getSecondGuardianUserId());
-        }
+        userDetail.setEmail(request.getEmail() != null ? request.getEmail() : userDetail.getEmail());
+        userDetail.setFirstName(request.getFirstName() != null ? request.getFirstName() : userDetail.getFirstName());
+        userDetail.setLastName(request.getLastName() != null ? request.getLastName() : userDetail.getLastName());
+        userDetail.setPhoneNumber(request.getPhoneNumber() != null ? request.getPhoneNumber() : userDetail.getPhoneNumber());
+        userDetail.setMajor(request.getMajor() != null ? request.getMajor() : userDetail.getMajor());
+        userDetail.setLocation(request.getLocation() != null ? request.getLocation() : userDetail.getLocation());
+        userDetail.setFirstGuardianUserId(validFirstGuardianUserId && userDetail.getFirstGuardianUserId() == null
+                ? request.getFirstGuardianUserId() : userDetail.getFirstGuardianUserId());
+        userDetail.setSecondGuardianUserId(validSecondGuardianUserId && userDetail.getSecondGuardianUserId() == null
+                ? request.getSecondGuardianUserId() : userDetail.getSecondGuardianUserId());
+
         userAuth.setUserDetail(userDetail);
         userAuthRepository.save(userAuth);
 

@@ -172,6 +172,7 @@ public class UserAppointmentScheduleServiceTest {
     @SneakyThrows
     void testGetAppointmentSchedule() {
         String userName = "testUser";
+        String userRole = "ROLE_PATIENT";
         Long appointmentId = 1L;
 
         UserAuth userAuth = mock(UserAuth.class);
@@ -180,7 +181,7 @@ public class UserAppointmentScheduleServiceTest {
         when(authRepository.findByUsername(eq(userName))).thenReturn(Optional.of(userAuth));
         when(scheduleRepository.findById(eq(appointmentId))).thenReturn(Optional.of(schedule));
 
-        GetAppointmentResponseData response = service.getAppointmentSchedule(userName, appointmentId);
+        GetAppointmentResponseData response = service.getAppointmentSchedule(userName, userRole, appointmentId);
 
         assertNotNull(response);
         assertTrue(response.isSuccess());

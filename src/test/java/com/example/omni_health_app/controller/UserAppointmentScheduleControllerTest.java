@@ -117,7 +117,7 @@ public class UserAppointmentScheduleControllerTest {
                 .totalPages(1)
                 .build();
 
-        when(service.getAllAppointmentSchedule(any(), any(), any(), any(), any())).thenReturn(responseData);
+        when(service.getAllAppointmentSchedule(any(), any(), any(), any(), any(), any())).thenReturn(responseData);
 
         ResponseEntity<ResponseWrapper<GetAllAppointmentResponseData>> response = controller.getAllAppointmentSchedule(
                 startDate, endDate, "created", 0, 10);
@@ -135,7 +135,7 @@ public class UserAppointmentScheduleControllerTest {
                         .build())
                 .build();
 
-        when(service.getAppointmentSchedule(any(), eq(1L))).thenReturn(responseData);
+        when(service.getAppointmentSchedule(any(), any(), eq(1L))).thenReturn(responseData);
 
         ResponseEntity<ResponseWrapper<GetAppointmentResponseData>> response = controller.getAppointmentSchedule(1L);
 

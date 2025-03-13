@@ -83,6 +83,21 @@ public interface UserAppointmentScheduleRepository extends JpaRepository<UserApp
             @Param("limit") int limit,
             @Param("offset") int offset);
 
+    @Query(value = "SELECT u.* FROM user_appointment_schedule u " +
+            "WHERE (:startDate IS NULL OR u.appointment_date_time >= :startDate) " +
+            "AND (:endDate IS NULL OR u.appointment_date_time <= :endDate) " +
+            "AND (:status IS NULL OR u.appointment_status = :status) " +
+            "ORDER BY u.appointment_date_time DESC " +
+            "LIMIT :limit OFFSET :offset",
+            nativeQuery = true)
+    List<UserAppointmentSchedule> findAppointments(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            @Param("status") String status,
+            @Param("limit") int limit,
+            @Param("offset") int offset);
+
+
     @Query(value = "SELECT COUNT(*) FROM user_appointment_schedule u " +
             "JOIN user_detail d ON u.user_detail_id = d.id " +
             "WHERE (d.first_guardian_user_id = :username OR d.second_guardian_user_id = :username)" +
@@ -103,17 +118,14 @@ public interface UserAppointmentScheduleRepository extends JpaRepository<UserApp
     List<UserAppointmentSchedule> findPendingAppointments(LocalDateTime startDateTime, LocalDateTime endDateTime);
 
     @Query("SELECT u FROM UserAppointmentSchedule u " +
-    "JOIN u.userDetail d " +
-    "WHERE (:startDate IS NULL OR u.appointmentDateTime >= :startDate) " +
-    "AND (:endDate IS NULL OR u.appointmentDateTime <= :endDate) " +
-    "AND (d.id = :doctorId)"
-     )
-     Page<UserAppointmentSchedule> findAppointments(
-     @Param("startDate") LocalDateTime startDate,
-     @Param("endDate") LocalDateTime endDate,
-     @Param("doctorId") Long doctorId,
-     Pageable pageable
-     );
+            "WHERE (:startDate IS NULL OR u.appointmentDateTime >= :startDate) " +
+            "AND (:endDate IS NULL OR u.appointmentDateTime <= :endDate) " +
+            "AND (:status IS NULL OR u.appointmentStatus = :status)")
+    Page<UserAppointmentSchedule> findAppointments(
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            @Param("status") String status,
+            Pageable pageable);
 
 
     @Query("SELECT COUNT(u) FROM UserAppointmentSchedule u " +

@@ -12,5 +12,7 @@ public class UserDetailsUpdateRequest {
     private String phoneNumber;
     private String firstGuardianUserId;
     private String secondGuardianUserId;
+    private String major;
+    private String location;
 
 }

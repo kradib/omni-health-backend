@@ -64,36 +64,6 @@ public class DoctorService {
                 .build();
     }
 
-    public GetAllAppointmentResponseData getAllAppointmentSchedule(
-            final String userName,
-            final LocalDateTime startDate,
-            final LocalDateTime endDate,
-            final String status,
-            final Pageable pageable) throws BadRequestException {
-        int pageSize = pageable.getPageSize();
-        int pageNumber = pageable.getPageNumber();
-        int offset = pageNumber * pageSize;
-        final Optional<UserAuth> userAuthOptional = userAuthRepository.findByUsername(userName);
-        if (userAuthOptional.isEmpty()) {
-            throw new BadRequestException(String.format("Doctor %s does not exist", userName));
-        }
-        final List<UserAppointmentSchedule> appointments =
-                userAppointmentScheduleRepository.findAppointmentsByDoctor(userAuthOptional.get().getUserDetail().getId(),
-                        startDate, endDate,
-                        status, pageSize, offset);
-        log.info("patient Appointments: {}", appointments);
-        long totalRecords = userAppointmentScheduleRepository.countAppointmentsByDependentAndDateRange(userName,
-                startDate, endDate, status);
-        Page<UserAppointmentSchedule> userAppointmentSchedulesPage = new PageImpl<>(appointments, pageable, totalRecords);
-        return GetAllAppointmentResponseData.builder()
-                .success(true)
-                .appointments(appointments)
-                .totalPages(userAppointmentSchedulesPage.getTotalPages())
-                .totalElements(userAppointmentSchedulesPage.getTotalElements())
-                .currentPage(userAppointmentSchedulesPage.getNumber())
-                .build();
-    }
-
     public List<UserDetail> listDoctors() {
         List<UserAuth> users = userAuthRepository.findByRolesContaining(DOCTOR_ROLE);
         return users.stream()

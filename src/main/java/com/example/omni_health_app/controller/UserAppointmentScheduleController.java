@@ -1,5 +1,6 @@
 package com.example.omni_health_app.controller;
 
+import com.example.omni_health_app.domain.model.UserRole;
 import com.example.omni_health_app.dto.request.CancelAppointmentRequest;
 import com.example.omni_health_app.dto.request.CreateAppointmentRequest;
 import com.example.omni_health_app.dto.request.UpdateAppointmentRequest;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
+import static com.example.omni_health_app.util.UserNameUtil.getCurrentUserRole;
 import static com.example.omni_health_app.util.UserNameUtil.getCurrentUsername;
 
 @RestController
@@ -114,10 +116,12 @@ public class UserAppointmentScheduleController {
             @RequestParam(value = "page", defaultValue = "0") int page,
             @RequestParam(value = "size", defaultValue = "10") int size) throws BadRequestException {
         final String userName = getCurrentUsername();
+        final String userRole = getCurrentUserRole();
         log.info("Receive get all appointments from {} to {} for {} with status {}", startDate, endDate, userName, status);
         final Pageable pageable = PageRequest.of(page, size);
         final ResponseWrapper<GetAllAppointmentResponseData> responseWrapper = GetAllAppointmentResponse.builder()
                 .data(userAppointmentScheduleService.getAllAppointmentSchedule(userName,
+                        UserRole.from(userRole),
                         startDate == null? null :LocalDateTime.parse(startDate),
                         endDate == null ? null : LocalDateTime.parse(endDate),
                         status,
@@ -132,6 +136,7 @@ public class UserAppointmentScheduleController {
     }
 
     @GetMapping("/dependents")
+    @PreAuthorize("hasRole('ROLE_PATIENT')")
     public ResponseEntity<ResponseWrapper<GetAllAppointmentResponseData>> getAllAppointmentScheduleForDependents(
             @RequestParam(value = "startDate", required = false) String startDate,
             @RequestParam(value = "endDate", required = false) String endDate,
@@ -158,13 +163,15 @@ public class UserAppointmentScheduleController {
     }
 
     @GetMapping("/{appointmentId}")
+    @PreAuthorize("hasRole('ROLE_PATIENT', 'ROLE_DOCTOR', 'ROLE_ADMIN')")
     public ResponseEntity<ResponseWrapper<GetAppointmentResponseData>> getAppointmentSchedule(
             @PathVariable("appointmentId") Long appointmentId) throws BadRequestException {
         final String userName = getCurrentUsername();
+        final String userRole = getCurrentUserRole();
         log.info("Receive get appointment request with id {} for {}", appointmentId, userName);
 
         final ResponseWrapper<GetAppointmentResponseData> responseWrapper = GetAppointmentResponse.builder()
-                .data(userAppointmentScheduleService.getAppointmentSchedule(userName, appointmentId))
+                .data(userAppointmentScheduleService.getAppointmentSchedule(userName, userRole, appointmentId))
                 .responseMetadata(ResponseMetadata.builder()
                         .statusCode(HttpStatus.OK.value())
                         .errorCode(0)
