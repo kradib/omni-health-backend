@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Data
@@ -41,4 +42,10 @@ public class UserAppointmentSchedule {
     @ManyToOne(optional = false, fetch = FetchType.EAGER)
     @JoinColumn(name = "doctor_detail_id", referencedColumnName = "id")
     private UserDetail doctorDetail;
+
+    @OneToMany(mappedBy = "appointment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Notes> notes;
+
+    @OneToMany(mappedBy = "appointment", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AppointmentDocument> documents;
 }
