@@ -1,7 +1,6 @@
 package com.example.omni_health_app.controller;
 
 import com.example.omni_health_app.domain.entity.AppointmentDocument;
-import com.example.omni_health_app.domain.entity.DocumentEntity;
 import com.example.omni_health_app.domain.model.UserRole;
 import com.example.omni_health_app.dto.request.AddNoteRequest;
 import com.example.omni_health_app.dto.request.CancelAppointmentRequest;
@@ -10,7 +9,6 @@ import com.example.omni_health_app.dto.request.UpdateAppointmentRequest;
 import com.example.omni_health_app.dto.response.*;
 import com.example.omni_health_app.exception.AppointmentAlreadyExistsException;
 import com.example.omni_health_app.exception.BadRequestException;
-import com.example.omni_health_app.exception.UserAuthException;
 import com.example.omni_health_app.service.DocumentService;
 import com.example.omni_health_app.service.NoteService;
 import com.example.omni_health_app.service.UserAppointmentScheduleService;
@@ -127,6 +125,7 @@ public class UserAppointmentScheduleController {
     }
 
     @PostMapping("/{appointmentId}/note")
+    @PreAuthorize("hasRole('ROLE_PATIENT', 'ROLE_DOCTOR')")
     public ResponseEntity<ResponseWrapper<GetAppointmentResponseData>> addNoteToAppointment(
             @PathVariable("appointmentId") Long appointmentId,
             @RequestBody AddNoteRequest addNoteRequest) throws BadRequestException {
@@ -145,6 +144,7 @@ public class UserAppointmentScheduleController {
     }
 
     @PostMapping("/{appointmentId}/document")
+    @PreAuthorize("hasRole('ROLE_PATIENT', 'ROLE_DOCTOR')")
     public ResponseEntity<ResponseWrapper<UploadDocumentResponseData>> addDocumentToAppointment(
             @PathVariable("appointmentId") Long appointmentId,
             @RequestParam("file") MultipartFile file, @RequestParam("documentName") String documentName) throws BadRequestException, IOException {

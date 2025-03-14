@@ -31,7 +31,6 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.example.omni_health_app.domain.model.UserRole.ROLE_ADMIN;
-import static com.example.omni_health_app.domain.model.UserRole.ROLE_PATIENT;
 
 @Service
 @RequiredArgsConstructor
@@ -220,9 +219,24 @@ public class UserAppointmentScheduleService {
         final Page<UserAppointmentSchedule> userAppointmentSchedulesPage =
                 userAppointmentScheduleRepository.findAppointments(startDate, endDate, status, pageable);
         final List<UserAppointmentSchedule> appointments = userAppointmentSchedulesPage.getContent();
+        final List<UserAppointmentSchedule> updatedAppointments = appointments.stream().map(appointmentSchedule ->
+                UserAppointmentSchedule.builder()
+                        .id(appointmentSchedule.getId())
+                        .slotId(appointmentSchedule.getSlotId())
+                        .appointmentStatus(appointmentSchedule.getAppointmentStatus())
+                        .notes(null)
+                        .userDetail(appointmentSchedule.getUserDetail())
+                        .appointmentDateTime(appointmentSchedule.getAppointmentDateTime())
+                        .doctorDetail(appointmentSchedule.getDoctorDetail())
+                        .documents(null)
+                        .prescription(null)
+                        .username(appointmentSchedule.getUsername())
+                        .build()
+                ).toList();
+
         return GetAllAppointmentResponseData.builder()
                 .success(true)
-                .appointments(appointments)
+                .appointments(updatedAppointments)
                 .totalPages(userAppointmentSchedulesPage.getTotalPages())
                 .totalElements(userAppointmentSchedulesPage.getTotalElements())
                 .currentPage(userAppointmentSchedulesPage.getNumber())
@@ -299,6 +313,8 @@ public class UserAppointmentScheduleService {
         final UserAppointmentSchedule userAppointmentSchedule = userAppointmentScheduleOptional.get();
         if(ROLE_ADMIN.toString().equals(userRole)) {
             userAppointmentSchedule.setPrescription(null);
+            userAppointmentSchedule.setDocuments(null);
+            userAppointmentSchedule.setNotes(null);
         }
         return GetAppointmentResponseData.builder()
                 .success(true)
