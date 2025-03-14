@@ -71,22 +71,5 @@ public class DoctorService {
                 .collect(Collectors.toList());
     }
 
-    public List<DocumentMetadata> getAllDocuments(final long appointmentId, final String doctorUserName) throws BadRequestException, UserAuthException {
-         Optional<UserAppointmentSchedule> userAppointmentScheduleOptional =
-                 userAppointmentScheduleRepository.findById(appointmentId);
-         if(userAppointmentScheduleOptional.isEmpty()) {
-             throw new BadRequestException("Appointment does not exist");
-         }
-         if(!userAppointmentScheduleOptional.get().getDoctorDetail().getUserAuth().getUsername().equals(doctorUserName)) {
-             throw new UserAuthException("Doctor does not have enough permision to view this appointment documents");
-         }
-        return documentRepository.findByUserName(userAppointmentScheduleOptional.get().getUsername())
-                .stream().map(documentEntity -> DocumentMetadata.builder()
-                .id(documentEntity.getId())
-                .documentName(documentEntity.getDocumentName())
-                .dateUploaded(documentEntity.getDateUploaded())
-                .build()).toList();
-    }
-
 
 }
