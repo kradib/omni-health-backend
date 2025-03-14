@@ -20,6 +20,8 @@ public class AddUserRequest {
     @NonNull
     @Unique
     private String emailId;
+    @NonNull
+    @Unique
     private String phoneNumber;
     @NonNull
     private String roles;
