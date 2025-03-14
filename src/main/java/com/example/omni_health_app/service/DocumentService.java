@@ -1,8 +1,10 @@
 package com.example.omni_health_app.service;
 
+import com.example.omni_health_app.domain.entity.AppointmentDocument;
 import com.example.omni_health_app.domain.entity.DocumentEntity;
 import com.example.omni_health_app.domain.entity.UserAppointmentSchedule;
 import com.example.omni_health_app.domain.entity.UserAuth;
+import com.example.omni_health_app.domain.repositories.AppointmentDocumentRepository;
 import com.example.omni_health_app.domain.repositories.DocumentRepository;
 import com.example.omni_health_app.domain.repositories.UserAppointmentScheduleRepository;
 import com.example.omni_health_app.domain.repositories.UserAuthRepository;
@@ -47,6 +49,7 @@ public class DocumentService {
     private final DocumentRepository documentRepository;
     private final UserAuthRepository userAuthRepository;
     private final UserAppointmentScheduleRepository userAppointmentScheduleRepository;
+    private final AppointmentDocumentRepository appointmentDocumentRepository;
 
 
     public DocumentMetadata uploadFile(MultipartFile file, String userName, String documentName)
@@ -84,6 +87,51 @@ public class DocumentService {
                 .build();
     }
 
+
+    public DocumentMetadata uploadFileForAppointment(MultipartFile file, String userName, String documentName,
+                                                      Long appointmentId)
+            throws BadRequestException, IOException {
+        final Optional<UserAuth> userAuthOptional = userAuthRepository.findByUsername(userName);
+        if (userAuthOptional.isEmpty()) {
+            throw new BadRequestException(String.format("User %s does not exist", userName));
+        }
+        final Optional<UserAppointmentSchedule> userAppointmentScheduleOptional =
+                userAppointmentScheduleRepository.findById(appointmentId);
+        if (userAppointmentScheduleOptional.isEmpty()) {
+            throw new BadRequestException("Appointment does not exist");
+        }
+        String originalFilename = file.getOriginalFilename();
+        String fileExtension = getFileExtension(originalFilename);
+
+        if (!ALLOWED_EXTENSIONS.contains(fileExtension.toLowerCase())) {
+            throw new IllegalArgumentException("Only PDF and JPG files are allowed!");
+        }
+
+        String uniqueFileName = UUID.randomUUID() + "_" + originalFilename;
+
+        Path userFolderPath = Paths.get(BASE_UPLOAD_DIR, userName);
+        if (!Files.exists(userFolderPath)) {
+            Files.createDirectories(userFolderPath);
+        }
+        Path filePath = userFolderPath.resolve(uniqueFileName);
+        Files.write(filePath, file.getBytes());
+
+        AppointmentDocument appointmentDocument = AppointmentDocument.builder()
+                .appointment(userAppointmentScheduleOptional.get())
+                .filePath(filePath.toString())
+                .dateUploaded(LocalDateTime.now())
+                .documentName(documentName)
+                .userName(userName)
+                .build();
+
+        appointmentDocumentRepository.save(appointmentDocument);
+        return DocumentMetadata.builder()
+                .documentName(appointmentDocument.getDocumentName())
+                .id(appointmentDocument.getId())
+                .dateUploaded(appointmentDocument.getDateUploaded())
+                .build();
+    }
+
     public List<DocumentMetadata> getAllDocuments(String userName) throws BadRequestException {
         final Optional<UserAuth> userAuthOptional = userAuthRepository.findByUsername(userName);
         if (userAuthOptional.isEmpty()) {
@@ -117,17 +165,26 @@ public class DocumentService {
         return documentEntityOptional.get();
     }
 
-    public DocumentEntity getDocument(String doctorUserName, long appointmentId, long documentId) throws BadRequestException,
-            UserAuthException, IOException {
+    public AppointmentDocument getAppointmentDocument(String userName, long appointmentId, long documentId) throws BadRequestException, IOException {
         Optional<UserAppointmentSchedule> userAppointmentScheduleOptional =
                 userAppointmentScheduleRepository.findById(appointmentId);
         if(userAppointmentScheduleOptional.isEmpty()) {
             throw new BadRequestException("Appointment does not exist");
         }
-        if(!userAppointmentScheduleOptional.get().getDoctorDetail().getUserAuth().getUsername().equals(doctorUserName)) {
-            throw new UserAuthException("Doctor does not have enough permission to view this appointment documents");
+        final Optional<AppointmentDocument> appointmentDocumentOptional = appointmentDocumentRepository.findById(documentId);
+        if(appointmentDocumentOptional.isEmpty()) {
+            throw new BadRequestException("Document does not exist");
         }
-        return getDocument(userAppointmentScheduleOptional.get().getUsername(), documentId);
+        if(!userAppointmentScheduleOptional.get().getUsername().equals(userName) && !userAppointmentScheduleOptional.get().getDoctorDetail().getUserAuth().getUsername().equals(userName)) {
+            throw new BadRequestException(String.format("userName %s does not have access to the appointment " +
+                    "documents", userName));
+        }
+        Path filePath = Paths.get(appointmentDocumentOptional.get().getFilePath());
+        Resource resource = new UrlResource(filePath.toUri());
+        if (!resource.exists() || !resource.isReadable()) {
+            throw new BadRequestException("document does not exist");
+        }
+        return appointmentDocumentOptional.get();
     }
 
     private String getFileExtension(String filename) {

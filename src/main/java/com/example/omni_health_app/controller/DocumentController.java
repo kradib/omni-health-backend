@@ -8,7 +8,6 @@ import com.example.omni_health_app.exception.UserAuthException;
 import com.example.omni_health_app.service.DocumentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -30,7 +29,7 @@ import static com.example.omni_health_app.util.UserNameUtil.getCurrentUsername;
 @RestController
 @RequestMapping("/api/v1/documents")
 @RequiredArgsConstructor
-public class DocumentUploadController {
+public class DocumentController {
 
 
     private final DocumentService documentService;

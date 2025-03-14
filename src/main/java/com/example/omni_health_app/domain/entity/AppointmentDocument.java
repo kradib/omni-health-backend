@@ -2,6 +2,7 @@ package com.example.omni_health_app.domain.entity;
 
 
 import jakarta.persistence.*;
+import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -9,6 +10,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "appointment_documents")
 @Data
+@Builder
 public class AppointmentDocument {
 
     @Id

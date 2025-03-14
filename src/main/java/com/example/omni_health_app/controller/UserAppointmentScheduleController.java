@@ -1,22 +1,39 @@
 package com.example.omni_health_app.controller;
 
+import com.example.omni_health_app.domain.entity.AppointmentDocument;
+import com.example.omni_health_app.domain.entity.DocumentEntity;
 import com.example.omni_health_app.domain.model.UserRole;
+import com.example.omni_health_app.dto.request.AddNoteRequest;
 import com.example.omni_health_app.dto.request.CancelAppointmentRequest;
 import com.example.omni_health_app.dto.request.CreateAppointmentRequest;
 import com.example.omni_health_app.dto.request.UpdateAppointmentRequest;
 import com.example.omni_health_app.dto.response.*;
 import com.example.omni_health_app.exception.AppointmentAlreadyExistsException;
 import com.example.omni_health_app.exception.BadRequestException;
+import com.example.omni_health_app.exception.UserAuthException;
+import com.example.omni_health_app.service.DocumentService;
+import com.example.omni_health_app.service.NoteService;
 import com.example.omni_health_app.service.UserAppointmentScheduleService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -30,6 +47,8 @@ import static com.example.omni_health_app.util.UserNameUtil.getCurrentUsername;
 public class UserAppointmentScheduleController {
 
     private final UserAppointmentScheduleService userAppointmentScheduleService;
+    private final NoteService noteService;
+    private final DocumentService documentService;
 
 
     @PostMapping
@@ -107,6 +126,42 @@ public class UserAppointmentScheduleController {
 
     }
 
+    @PostMapping("/{appointmentId}/note")
+    public ResponseEntity<ResponseWrapper<GetAppointmentResponseData>> addNoteToAppointment(
+            @PathVariable("appointmentId") Long appointmentId,
+            @RequestBody AddNoteRequest addNoteRequest) throws BadRequestException {
+        final String userName = getCurrentUsername();
+        final String userRole = getCurrentUserRole();
+        log.info("Received add note request for appointment id {}", appointmentId);
+        noteService.addNote(userName, appointmentId, addNoteRequest);
+        final ResponseWrapper<GetAppointmentResponseData> responseWrapper = GetAppointmentResponse.builder()
+                .data(userAppointmentScheduleService.getAppointmentSchedule(userName, userRole, appointmentId))
+                .responseMetadata(ResponseMetadata.builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .errorCode(0)
+                        .build())
+                .build();
+        return ResponseEntity.ok(responseWrapper);
+    }
+
+    @PostMapping("/{appointmentId}/document")
+    public ResponseEntity<ResponseWrapper<UploadDocumentResponseData>> addDocumentToAppointment(
+            @PathVariable("appointmentId") Long appointmentId,
+            @RequestParam("file") MultipartFile file, @RequestParam("documentName") String documentName) throws BadRequestException, IOException {
+        final String userName = getCurrentUsername();
+        log.info("Received add document request for appointment id {}", appointmentId);
+        final ResponseWrapper<UploadDocumentResponseData> responseWrapper = UploadDocumentResponse.builder()
+                .data(UploadDocumentResponseData.builder()
+                                .documentMetadata(documentService.uploadFileForAppointment(file, userName, documentName, appointmentId))
+                        .build())
+                .responseMetadata(ResponseMetadata.builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .errorCode(0)
+                        .build())
+                .build();
+        return ResponseEntity.ok(responseWrapper);
+    }
+
 
     @GetMapping
     public ResponseEntity<ResponseWrapper<GetAllAppointmentResponseData>> getAllAppointmentSchedule(
@@ -179,6 +234,35 @@ public class UserAppointmentScheduleController {
                 .build();
         return ResponseEntity.ok(responseWrapper);
 
+    }
+
+
+    @GetMapping("/{appointmentId}/{documentId}")
+    @PreAuthorize("hasRole('ROLE_PATIENT', 'ROLE_DOCTOR')")
+    public ResponseEntity<InputStreamResource> downloadAppointmentDocument(@PathVariable("appointmentId") final int appointmentId,
+                                                                           @PathVariable("documentId") final int documentId) throws BadRequestException,
+            IOException {
+
+        final String userName = getCurrentUsername();
+        final AppointmentDocument documentEntity = documentService.getAppointmentDocument(userName, appointmentId, documentId);
+
+        Path filePath = Paths.get(documentEntity.getFilePath());
+        File file = filePath.toFile();
+        if (!file.exists() || !file.canRead()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "File not found or not readable");
+        }
+
+        InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
+        String contentType = Files.probeContentType(filePath);
+        if (contentType == null) {
+            contentType = "application/octet-stream";
+        }
+        return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + file.getName() + "\"")
+                .header(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.CONTENT_DISPOSITION)
+                .body(resource);
     }
 
 }
