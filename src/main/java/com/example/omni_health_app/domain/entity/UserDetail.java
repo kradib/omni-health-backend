@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
+
 @Entity
 @Data
 @Builder
@@ -25,7 +27,11 @@ public class UserDetail {
     private String secondGuardianUserId;
     private String major;
     private String location;
-
+    @Column(nullable = false)
+    private LocalDate dateOfBirth;
+    private Double weight;
+    private Integer height;
+    private String bloodGroup;
     @OneToOne(mappedBy = "userDetail")
     @JsonBackReference
     @ToString.Exclude

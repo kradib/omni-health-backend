@@ -12,7 +12,6 @@ import com.example.omni_health_app.exception.UserAuthException;
 import com.example.omni_health_app.util.TokenUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.User;
 import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -20,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 import java.util.Random;
-import java.util.UUID;
 
 import static com.example.omni_health_app.util.Constants.CACHE_NAME;
 import static com.example.omni_health_app.util.Constants.PATIENT_ROLE;
@@ -64,6 +62,10 @@ public class UserAuthService {
                 .phoneNumber(request.getPhoneNumber())
                 .firstGuardianUserId(validFirstGuardianUserId ? request.getFirstGuardianUserId(): null)
                 .secondGuardianUserId(validSecondGuardianUserId? request.getSecondGuardianUserId(): null)
+                .dateOfBirth(request.getDateOfBirth())
+                .height(request.getHeight())
+                .weight(request.getWeight())
+                .bloodGroup(request.getBloodGroup())
                 .build();
 
         final UserAuth userAuth = UserAuth.builder()
@@ -108,6 +110,10 @@ public class UserAuthService {
                 ? request.getFirstGuardianUserId() : userDetail.getFirstGuardianUserId());
         userDetail.setSecondGuardianUserId(validSecondGuardianUserId && userDetail.getSecondGuardianUserId() == null
                 ? request.getSecondGuardianUserId() : userDetail.getSecondGuardianUserId());
+        userDetail.setDateOfBirth(request.getDateOfBirth() != null ? request.getDateOfBirth() : userDetail.getDateOfBirth());
+        userDetail.setWeight(request.getWeight() != null ? request.getWeight() : userDetail.getWeight());
+        userDetail.setHeight(request.getHeight() != null ? request.getHeight() : userDetail.getHeight());
+        userDetail.setBloodGroup(request.getBloodGroup() != null ? request.getBloodGroup() : userDetail.getBloodGroup());
 
         userAuth.setUserDetail(userDetail);
         userAuthRepository.save(userAuth);

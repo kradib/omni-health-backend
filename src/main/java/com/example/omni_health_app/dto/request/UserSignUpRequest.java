@@ -4,6 +4,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
 
+import java.time.LocalDate;
+
 @Data
 @Builder
 public class UserSignUpRequest {
@@ -20,5 +22,10 @@ public class UserSignUpRequest {
     private String phoneNumber;
     private String firstGuardianUserId;
     private String secondGuardianUserId;
+    @NonNull
+    private LocalDate dateOfBirth;
+    private Double weight;
+    private Integer height;
+    private String bloodGroup;
 
 }
