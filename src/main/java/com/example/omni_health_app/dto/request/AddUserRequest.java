@@ -19,7 +19,7 @@ public class AddUserRequest {
     private String lastName;
     @NonNull
     @Unique
-    private String emailId;
+    private String email;
     @NonNull
     @Unique
     private String phoneNumber;

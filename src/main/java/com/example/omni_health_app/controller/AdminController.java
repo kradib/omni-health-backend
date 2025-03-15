@@ -30,8 +30,8 @@ public class AdminController {
 
     @PostMapping("/addUser")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ResponseWrapper<AddUserResponseData>> signUp(@RequestBody @NonNull AddUserRequest request) throws UserAuthException {
-        log.info("Receive add userrequest {}", request);
+    public ResponseEntity<ResponseWrapper<AddUserResponseData>> signUp(@RequestBody @NonNull AddUserRequest request) throws UserAuthException, BadRequestException {
+        log.info("Receive add user request {}", request);
         final ResponseWrapper<AddUserResponseData> responseWrapper = AddUserResponse.builder()
                 .data(AddUserResponseData.builder()
                         .userDetail(adminService.addUser(request))

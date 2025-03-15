@@ -125,7 +125,7 @@ public class UserAppointmentScheduleController {
     }
 
     @PostMapping("/{appointmentId}/note")
-    @PreAuthorize("hasRole('ROLE_PATIENT', 'ROLE_DOCTOR')")
+    @PreAuthorize("hasAnyRole('ROLE_PATIENT', 'ROLE_DOCTOR')")
     public ResponseEntity<ResponseWrapper<GetAppointmentResponseData>> addNoteToAppointment(
             @PathVariable("appointmentId") Long appointmentId,
             @RequestBody AddNoteRequest addNoteRequest) throws BadRequestException {
@@ -144,7 +144,7 @@ public class UserAppointmentScheduleController {
     }
 
     @PostMapping("/{appointmentId}/document")
-    @PreAuthorize("hasRole('ROLE_PATIENT', 'ROLE_DOCTOR')")
+    @PreAuthorize("hasAnyRole('ROLE_PATIENT', 'ROLE_DOCTOR')")
     public ResponseEntity<ResponseWrapper<UploadDocumentResponseData>> addDocumentToAppointment(
             @PathVariable("appointmentId") Long appointmentId,
             @RequestParam("file") MultipartFile file, @RequestParam("documentName") String documentName) throws BadRequestException, IOException {
@@ -172,7 +172,8 @@ public class UserAppointmentScheduleController {
             @RequestParam(value = "size", defaultValue = "10") int size) throws BadRequestException {
         final String userName = getCurrentUsername();
         final String userRole = getCurrentUserRole();
-        log.info("Receive get all appointments from {} to {} for {} with status {}", startDate, endDate, userName, status);
+        log.info("Receive get all appointments from {} to {} for {} having role {} with status {}", startDate, endDate,
+                userName, userRole, status);
         final Pageable pageable = PageRequest.of(page, size);
         final ResponseWrapper<GetAllAppointmentResponseData> responseWrapper = GetAllAppointmentResponse.builder()
                 .data(userAppointmentScheduleService.getAllAppointmentSchedule(userName,
@@ -218,7 +219,7 @@ public class UserAppointmentScheduleController {
     }
 
     @GetMapping("/{appointmentId}")
-    @PreAuthorize("hasRole('ROLE_PATIENT', 'ROLE_DOCTOR', 'ROLE_ADMIN')")
+    @PreAuthorize("hasAnyRole('ROLE_PATIENT', 'ROLE_DOCTOR', 'ROLE_ADMIN')")
     public ResponseEntity<ResponseWrapper<GetAppointmentResponseData>> getAppointmentSchedule(
             @PathVariable("appointmentId") Long appointmentId) throws BadRequestException {
         final String userName = getCurrentUsername();
@@ -237,8 +238,8 @@ public class UserAppointmentScheduleController {
     }
 
 
-    @GetMapping("/{appointmentId}/{documentId}")
-    @PreAuthorize("hasRole('ROLE_PATIENT', 'ROLE_DOCTOR')")
+    @GetMapping("/{appointmentId}/document/{documentId}")
+    @PreAuthorize("hasAnyRole('ROLE_PATIENT', 'ROLE_DOCTOR')")
     public ResponseEntity<InputStreamResource> downloadAppointmentDocument(@PathVariable("appointmentId") final int appointmentId,
                                                                            @PathVariable("documentId") final int documentId) throws BadRequestException,
             IOException {

@@ -1,0 +1,2 @@
+ALTER TABLE document
+ADD COLUMN document_name VARCHAR(255) NOT NULL;

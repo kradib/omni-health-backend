@@ -50,6 +50,7 @@ public class DoctorController {
         log.info("Received request to fetch doctor list");
         final ResponseWrapper<ListDoctorsResponseData> responseWrapper = ListDoctorsResponse.builder()
                 .data(ListDoctorsResponseData.builder()
+                        .success(true)
                         .doctorDetails(doctorService.listDoctors())
                         .build())
                 .responseMetadata(ResponseMetadata.builder()

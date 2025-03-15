@@ -103,11 +103,16 @@ public class UserAppointmentScheduleService {
         }
         final Optional<UserAppointmentSchedule> userAppointmentScheduleOptional = userAppointmentScheduleRepository.findById(dto.getAppointmentId());
         if (userAppointmentScheduleOptional.isEmpty()) {
-            throw new BadRequestException(String.format("AppointId %s for user %s does not exists", dto.getAppointmentId(), userName));
+            throw new BadRequestException(String.format("AppointmentId %s for user %s does not exists",
+                    dto.getAppointmentId(), userName));
         }
         final UserAppointmentSchedule userAppointmentSchedule = userAppointmentScheduleOptional.get();
         if (!userAppointmentSchedule.getUsername().equals(userName)) {
-            throw new BadRequestException(String.format("AppointId %s does not belong to this user %s ", dto.getAppointmentId(), userName));
+            throw new BadRequestException(String.format("AppointmentId %s does not belong to this user %s ",
+                    dto.getAppointmentId(), userName));
+        }
+        if(userAppointmentSchedule.getAppointmentStatus().equals(AppointmentStatus.COMPLETED.getStatus())) {
+            throw new BadRequestException("Appointment already completed");
         }
         userAppointmentSchedule.setAppointmentStatus(AppointmentStatus.CANCELLED.getStatus());
         userAppointmentScheduleRepository.save(userAppointmentSchedule);

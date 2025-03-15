@@ -6,6 +6,7 @@ import com.example.omni_health_app.dto.response.ResponseMetadata;
 import com.example.omni_health_app.dto.response.ResponseWrapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -66,6 +67,19 @@ public class GlobalExceptionHandler {
                 .build();
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ErrorResponse.builder()
+                .responseMetadata(responseMetadata)
+                .build());
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ResponseWrapper<ErrorResponseData>> handleAccessDeniedException(AccessDeniedException ex) {
+        ResponseMetadata responseMetadata = ResponseMetadata.builder()
+                .statusCode(HttpStatus.UNAUTHORIZED.value())
+                .errors(List.of("You are not authorized to perform the action, please contact support"))
+                .errorCode(BAD_REQUEST_WRONG_AUTH_ERROR)
+                .build();
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(ErrorResponse.builder()
                 .responseMetadata(responseMetadata)
                 .build());
     }

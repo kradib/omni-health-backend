@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 
 public enum UserRole {
 
-    ROLE_PATIENT("ROLE_PATIENT"), ROLE_DOCTOR("ROLE_DOCTOR"), ROLE_ADMIN("ROLE_DOCTOR");
+    ROLE_PATIENT("ROLE_PATIENT"), ROLE_DOCTOR("ROLE_DOCTOR"), ROLE_ADMIN("ROLE_ADMIN");
 
     private final String role;
 

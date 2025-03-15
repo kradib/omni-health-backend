@@ -9,35 +9,23 @@ import com.example.omni_health_app.domain.repositories.DocumentRepository;
 import com.example.omni_health_app.domain.repositories.UserAppointmentScheduleRepository;
 import com.example.omni_health_app.domain.repositories.UserAuthRepository;
 import com.example.omni_health_app.dto.response.DocumentMetadata;
-import com.example.omni_health_app.dto.response.DownloadDocumentResponseData;
 import com.example.omni_health_app.exception.BadRequestException;
 import com.example.omni_health_app.exception.UserAuthException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
-import software.amazon.awssdk.core.sync.RequestBody;
-import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 
 @Service
@@ -121,7 +109,6 @@ public class DocumentService {
                 .filePath(filePath.toString())
                 .dateUploaded(LocalDateTime.now())
                 .documentName(documentName)
-                .userName(userName)
                 .build();
 
         appointmentDocumentRepository.save(appointmentDocument);

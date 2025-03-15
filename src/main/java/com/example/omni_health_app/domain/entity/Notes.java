@@ -1,8 +1,11 @@
 package com.example.omni_health_app.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
@@ -10,6 +13,8 @@ import java.time.LocalDateTime;
 @Table(name = "notes")
 @Data
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Notes {
 
     @Id
@@ -18,6 +23,7 @@ public class Notes {
 
     @ManyToOne
     @JoinColumn(name = "appointment_id", nullable = false)
+    @JsonBackReference
     private UserAppointmentSchedule appointment;
 
     @Column(nullable = false, columnDefinition = "TEXT")

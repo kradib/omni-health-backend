@@ -30,23 +30,23 @@ public class AdminService {
     private final UserAuthService userAuthService;
     private final PasswordEncoder passwordEncoder;
 
-    public UserDetail addUser(AddUserRequest request) throws UserAuthException {
+    public UserDetail addUser(AddUserRequest request) throws UserAuthException, BadRequestException {
         if ("doctor".equalsIgnoreCase(request.getRoles())) {
             if (request.getMajor() == null || request.getMajor().trim().isEmpty()) {
-                throw new IllegalArgumentException("Major is required for Doctor role.");
+                throw new BadRequestException("Major is required for Doctor role.");
             }
             if (request.getLocation() == null || request.getLocation().trim().isEmpty()) {
-                throw new IllegalArgumentException("Location is required for Doctor role.");
+                throw new BadRequestException("Location is required for Doctor role.");
             }
         }
         if (userAuthRepository.existsByUsername(request.getUsername())) {
             throw new UserAuthException("Username is already taken");
         }
-        if (userDetailsRepository.existsByEmail(request.getEmailId())) {
+        if (userDetailsRepository.existsByEmail(request.getEmail())) {
             throw new UserAuthException("Email Id is already taken");
         }
         final UserDetail userDetail = UserDetail.builder()
-                .email(request.getEmailId())
+                .email(request.getEmail())
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .phoneNumber(request.getPhoneNumber())

@@ -1,5 +1,6 @@
 package com.example.omni_health_app.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -44,8 +45,10 @@ public class UserAppointmentSchedule {
     private UserDetail doctorDetail;
 
     @OneToMany(mappedBy = "appointment", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<Notes> notes;
 
     @OneToMany(mappedBy = "appointment", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<AppointmentDocument> documents;
 }
