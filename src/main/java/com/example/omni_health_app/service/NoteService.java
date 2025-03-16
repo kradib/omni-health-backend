@@ -25,7 +25,7 @@ public class NoteService {
 
 
     @Transactional
-    public Notes addNote(final String userName, final Long appointmentId, AddNoteRequest request) throws BadRequestException {
+    public void addNote(final String userName, final Long appointmentId, AddNoteRequest request) throws BadRequestException {
 
         UserAppointmentSchedule appointment = userAppointmentScheduleRepository.findById(appointmentId)
                 .orElseThrow(() -> new BadRequestException("Appointment not found with id: " + appointmentId));
@@ -39,8 +39,9 @@ public class NoteService {
                 .note(request.getNote())
                 .name(userAuthOptional.get().getUserDetail().getFirstName() + " " + userAuthOptional.get().getUserDetail().getLastName())
                 .createdAt(LocalDateTime.now())
+                .role(userAuthOptional.get().getRoles())
                 .build();
-        return notesRepository.save(note);
+        notesRepository.save(note);
     }
 
 

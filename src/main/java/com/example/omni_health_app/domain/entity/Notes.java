@@ -31,6 +31,8 @@ public class Notes {
 
     @Column(nullable = false)
     private String name;
+    @Column(nullable = false)
+    private String role;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
