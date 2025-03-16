@@ -2,29 +2,22 @@ package com.example.omni_health_app.service;
 
 import com.example.omni_health_app.domain.entity.UserAppointmentSchedule;
 import com.example.omni_health_app.domain.entity.UserAuth;
-import com.example.omni_health_app.domain.entity.UserDetail;
 import com.example.omni_health_app.domain.model.AppointmentStatus;
 import com.example.omni_health_app.domain.repositories.UserAppointmentScheduleRepository;
 import com.example.omni_health_app.domain.repositories.UserAuthRepository;
 import com.example.omni_health_app.dto.request.CancelAppointmentRequest;
-import com.example.omni_health_app.dto.request.CreateAppointmentRequest;
-import com.example.omni_health_app.dto.request.UpdateAppointmentRequest;
-import com.example.omni_health_app.dto.response.*;
+import com.example.omni_health_app.dto.response.CancelAppointmentResponseData;
+import com.example.omni_health_app.dto.response.GetAppointmentResponseData;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 
-import java.time.LocalDateTime;
-import java.util.Collections;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -90,7 +83,7 @@ public class UserAppointmentScheduleServiceTest {
         when(scheduleRepository.findById(eq(request.getAppointmentId()))).thenReturn(Optional.of(schedule));
         when(schedule.getUsername()).thenReturn(userName);
 
-        CancelAppointmentResponseData response = service.cancelAppointmentSchedule(userName, request);
+        CancelAppointmentResponseData response = service.cancelAppointmentSchedule(userName, "ROLE_PATIENT", request);
 
         verify(schedule).setAppointmentStatus(AppointmentStatus.CANCELLED.getStatus());
         verify(scheduleRepository).save(schedule);

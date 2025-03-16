@@ -90,10 +90,12 @@ public class UserAppointmentScheduleController {
     public ResponseEntity<ResponseWrapper<CancelAppointmentResponseData>> cancelAppointmentSchedule
             (@RequestBody CancelAppointmentRequest cancelAppointmentRequest) throws BadRequestException {
         final String userName = getCurrentUsername();
+        final String userRole = getCurrentUserRole();
         log.info("Receive appointment cancel request {} for {}", cancelAppointmentRequest, userName);
 
         final ResponseWrapper<CancelAppointmentResponseData> responseWrapper = CancelAppointmentResponse.builder()
-                .data(userAppointmentScheduleService.cancelAppointmentSchedule(userName, cancelAppointmentRequest))
+                .data(userAppointmentScheduleService.cancelAppointmentSchedule(userName, userRole,
+                        cancelAppointmentRequest))
                 .responseMetadata(ResponseMetadata.builder()
                         .statusCode(HttpStatus.OK.value())
                         .errorCode(0)
@@ -105,15 +107,17 @@ public class UserAppointmentScheduleController {
 
 
     @PatchMapping("/{appointmentId}")
+    @PreAuthorize("hasAnyRole('ROLE_PATIENT', 'ROLE_ADMIN')")
     public ResponseEntity<ResponseWrapper<UpdateAppointmentResponseData>> updateAppointmentSchedule(
             @PathVariable("appointmentId") Long appointmentId,
             @RequestBody UpdateAppointmentRequest updateAppointmentRequest) throws BadRequestException {
         final String userName = getCurrentUsername();
+        final String userRole = getCurrentUserRole();
         log.info("Receive appointment update request {} for {} on {}", updateAppointmentRequest, userName,
                 appointmentId);
 
         final ResponseWrapper<UpdateAppointmentResponseData> responseWrapper = UpdateAppointmentResponse.builder()
-                .data(userAppointmentScheduleService.updateAppointmentSchedule(userName, appointmentId,
+                .data(userAppointmentScheduleService.updateAppointmentSchedule(userName, userRole, appointmentId,
                         updateAppointmentRequest))
                 .responseMetadata(ResponseMetadata.builder()
                         .statusCode(HttpStatus.OK.value())

@@ -2,9 +2,10 @@ package com.example.omni_health_app.controller;
 
 import com.example.omni_health_app.domain.entity.UserAppointmentSchedule;
 import com.example.omni_health_app.dto.request.CancelAppointmentRequest;
-import com.example.omni_health_app.dto.request.CreateAppointmentRequest;
-import com.example.omni_health_app.dto.request.UpdateAppointmentRequest;
-import com.example.omni_health_app.dto.response.*;
+import com.example.omni_health_app.dto.response.CancelAppointmentResponseData;
+import com.example.omni_health_app.dto.response.GetAllAppointmentResponseData;
+import com.example.omni_health_app.dto.response.GetAppointmentResponseData;
+import com.example.omni_health_app.dto.response.ResponseWrapper;
 import com.example.omni_health_app.service.UserAppointmentScheduleService;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
@@ -18,7 +19,6 @@ import org.springframework.http.ResponseEntity;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
@@ -71,7 +71,7 @@ public class UserAppointmentScheduleControllerTest {
                 .success(true)
                 .build();
 
-        when(service.cancelAppointmentSchedule(any(), eq(request))).thenReturn(responseData);
+        when(service.cancelAppointmentSchedule(any(), any(), eq(request))).thenReturn(responseData);
 
         ResponseEntity<ResponseWrapper<CancelAppointmentResponseData>> response = controller.cancelAppointmentSchedule(request);
 

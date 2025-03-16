@@ -5,5 +5,6 @@ public final class Constants {
     public static final String CACHE_NAME = "resetTokens";
     public static final String DOCTOR_ROLE = "doctor";
     public static final String PATIENT_ROLE = "patient";
+    public static final String ADMIN_ROLE = "admin";
 
 }

@@ -30,7 +30,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static com.example.omni_health_app.domain.model.UserRole.ROLE_ADMIN;
+import static com.example.omni_health_app.domain.model.UserRole.*;
 
 @Service
 @RequiredArgsConstructor
@@ -96,7 +96,8 @@ public class UserAppointmentScheduleService {
     }
 
     @Transactional
-    public CancelAppointmentResponseData cancelAppointmentSchedule(final String userName, CancelAppointmentRequest dto) throws BadRequestException {
+    public CancelAppointmentResponseData cancelAppointmentSchedule(final String userName,
+     final String userRole, CancelAppointmentRequest dto) throws BadRequestException {
         final Optional<UserAuth> userAuthOptional = userAuthRepository.findByUsername(userName);
         if (userAuthOptional.isEmpty()) {
             throw new BadRequestException(String.format("user %s does not exists", userName));
@@ -107,10 +108,15 @@ public class UserAppointmentScheduleService {
                     dto.getAppointmentId(), userName));
         }
         final UserAppointmentSchedule userAppointmentSchedule = userAppointmentScheduleOptional.get();
-        if (!userAppointmentSchedule.getUsername().equals(userName)) {
+        if (ROLE_PATIENT.toString().equals(userRole) && !userAppointmentSchedule.getUsername().equals(userName)) {
             throw new BadRequestException(String.format("AppointmentId %s does not belong to this user %s ",
                     dto.getAppointmentId(), userName));
         }
+        if (ROLE_DOCTOR.toString().equals(userRole) && !userAppointmentSchedule.getDoctorDetail().getUserAuth().getUsername().equals(userName)) {
+            throw new BadRequestException(String.format("AppointmentId %s does not belong to this doctor %s ",
+                    dto.getAppointmentId(), userName));
+        }
+
         if(userAppointmentSchedule.getAppointmentStatus().equals(AppointmentStatus.COMPLETED.getStatus())) {
             throw new BadRequestException("Appointment already completed");
         }
@@ -126,7 +132,8 @@ public class UserAppointmentScheduleService {
     }
 
     @Transactional
-    public UpdateAppointmentResponseData updateAppointmentSchedule(final String userName, Long appointmentId,
+    public UpdateAppointmentResponseData updateAppointmentSchedule(final String userName, final String userRole,
+                                                                   Long appointmentId,
                                                                    UpdateAppointmentRequest dto) throws BadRequestException {
         final Optional<UserAuth> userAuthOptional = userAuthRepository.findByUsername(userName);
         if (userAuthOptional.isEmpty()) {
@@ -137,12 +144,15 @@ public class UserAppointmentScheduleService {
             throw new BadRequestException(String.format("AppointId %s for user %s does not exists", appointmentId, userName));
         }
         final UserAppointmentSchedule userAppointmentSchedule = userAppointmentScheduleOptional.get();
-        if (!userAppointmentSchedule.getUsername().equals(userName)) {
+        if (ROLE_PATIENT.toString().equals(userRole) && !userAppointmentSchedule.getUsername().equals(userName)) {
             throw new BadRequestException(String.format("AppointId %s does not belong to this user %s ", appointmentId, userName));
         }
 
         if (userAppointmentSchedule.getAppointmentStatus().equals(AppointmentStatus.CANCELLED.getStatus())) {
             throw new BadRequestException(String.format("Appointment Id %s already cancelled ", appointmentId));
+        }
+        if (userAppointmentSchedule.getAppointmentStatus().equals(AppointmentStatus.COMPLETED.getStatus())) {
+            throw new BadRequestException(String.format("Appointment Id %s already completed ", appointmentId));
         }
 
         LocalDate previousAppointmentDate = userAppointmentSchedule.getAppointmentDateTime().toLocalDate();
@@ -263,7 +273,7 @@ public class UserAppointmentScheduleService {
                 userAppointmentScheduleRepository.findAppointmentsByDoctor(userAuthOptional.get().getId(), startDate, endDate,
                         status, pageSize, offset);
         log.info("Appointments for doctor {}: {}", userName, appointments);
-        long totalRecords = userAppointmentScheduleRepository.countAppointmentsByUserAndDateRange(userName, startDate
+        long totalRecords = userAppointmentScheduleRepository.countAppointmentsByDoctor(userAuthOptional.get().getId(), startDate
                 , endDate, status);
         Page<UserAppointmentSchedule> userAppointmentSchedulesPage = new PageImpl<>(appointments, pageable, totalRecords);
         return GetAllAppointmentResponseData.builder()
@@ -315,6 +325,13 @@ public class UserAppointmentScheduleService {
         if (userAppointmentScheduleOptional.isEmpty()) {
             throw new BadRequestException(String.format("Appointment for user %s does not exists", userName));
         }
+        if(ROLE_PATIENT.toString().equals(userRole) && !userAppointmentScheduleOptional.get().getUsername().equals(userName)) {
+            throw new BadRequestException(String.format("Appointment does not belong to  user %s ", userName));
+        }
+        if(ROLE_DOCTOR.toString().equals(userRole) && !userAppointmentScheduleOptional.get().getDoctorDetail().getUserAuth().getUsername().equals(userName)) {
+            throw new BadRequestException(String.format("Appointment does not belong to  doctor %s ", userName));
+        }
+
         final UserAppointmentSchedule userAppointmentSchedule = userAppointmentScheduleOptional.get();
         if(ROLE_ADMIN.toString().equals(userRole)) {
             userAppointmentSchedule.setPrescription(null);
