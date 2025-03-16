@@ -6,6 +6,5 @@ import lombok.Data;
 @Data
 @Builder
 public class UpdateAppointmentStatusRequest {
-    private String appointmentStatus;
     private String prescription;
 }

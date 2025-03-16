@@ -1,29 +1,21 @@
 package com.example.omni_health_app.service;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
-
+import com.example.omni_health_app.domain.entity.UserAppointmentSchedule;
 import com.example.omni_health_app.domain.entity.UserAuth;
 import com.example.omni_health_app.domain.entity.UserDetail;
 import com.example.omni_health_app.domain.model.AppointmentStatus;
-import com.example.omni_health_app.domain.repositories.DocumentRepository;
+import com.example.omni_health_app.domain.repositories.UserAppointmentScheduleRepository;
 import com.example.omni_health_app.domain.repositories.UserAuthRepository;
-import com.example.omni_health_app.dto.response.*;
-import com.example.omni_health_app.exception.UserAuthException;
+import com.example.omni_health_app.dto.request.UpdateAppointmentStatusRequest;
+import com.example.omni_health_app.dto.response.UpdateAppointmentResponseData;
+import com.example.omni_health_app.exception.BadRequestException;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import com.example.omni_health_app.domain.entity.UserAppointmentSchedule;
-import com.example.omni_health_app.domain.repositories.UserAppointmentScheduleRepository;
-import com.example.omni_health_app.dto.request.UpdateAppointmentStatusRequest;
-import com.example.omni_health_app.exception.BadRequestException;
-
-import lombok.RequiredArgsConstructor;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static com.example.omni_health_app.util.Constants.DOCTOR_ROLE;
 
@@ -33,16 +25,15 @@ import static com.example.omni_health_app.util.Constants.DOCTOR_ROLE;
 public class DoctorService {
     private final UserAppointmentScheduleRepository userAppointmentScheduleRepository;
     private final UserAuthRepository userAuthRepository;
-    private final DocumentRepository documentRepository;
 
      public UpdateAppointmentResponseData updateAppointmentScheduleStatus(final String userName, Long appointmentId,
                                                                    UpdateAppointmentStatusRequest dto) throws BadRequestException {
        
-        if (AppointmentStatus.COMPLETED.toString().equalsIgnoreCase(dto.getAppointmentStatus())) {
-            if (dto.getPrescription() == null || dto.getPrescription().trim().isEmpty()) {
-                throw new IllegalArgumentException("Prescription required when status is completed");
-            }           
+
+        if (dto.getPrescription() == null || dto.getPrescription().trim().isEmpty()) {
+            throw new IllegalArgumentException("Prescription required when status is completed");
         }
+
 
         final Optional<UserAppointmentSchedule> userAppointmentScheduleOptional = userAppointmentScheduleRepository.findById(appointmentId);
         if(userAppointmentScheduleOptional.isEmpty()) {
@@ -54,7 +45,7 @@ public class DoctorService {
                     "%s ",appointmentId, userName));
         }
 
-        userAppointmentSchedule.setAppointmentStatus(dto.getAppointmentStatus());
+        userAppointmentSchedule.setAppointmentStatus(AppointmentStatus.COMPLETED.getStatus());
         userAppointmentSchedule.setPrescription(dto.getPrescription());
 
         final UserAppointmentSchedule updatedUserAppointmentSchedule = userAppointmentScheduleRepository.save(userAppointmentSchedule);
