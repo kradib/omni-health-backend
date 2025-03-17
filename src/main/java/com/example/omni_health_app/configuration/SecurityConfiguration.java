@@ -18,6 +18,10 @@ import java.util.List;
 @Configuration
 public class SecurityConfiguration {
 
+    // use your PC IP address
+    private static List<String> allowedOrigins = List.of("http://192.168.29.234:5173", "http://localhost:5173",
+            "http://192.168.29.234:5174", "http://localhost:5174");
+
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -31,8 +35,7 @@ public class SecurityConfiguration {
                 .disable()
                 .cors(cors -> cors.configurationSource(request -> {
                     CorsConfiguration config = new CorsConfiguration();
-                    config.setAllowedOrigins(List.of("http://192.168.29.234:5173", "http://localhost:5173")); // use
-                    // your PC IP address
+                    config.setAllowedOrigins(allowedOrigins);
                     config.setAllowedMethods(List.of("GET", "POST", "PATCH", "DELETE", "OPTIONS"));
                     config.setAllowedHeaders(List.of("*"));
                     config.setExposedHeaders(List.of("Content-Disposition"));
