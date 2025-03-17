@@ -84,20 +84,19 @@ public class UserAuthService {
         if (!userAuthRepository.existsByUsername(userName)) {
             throw new UserAuthException("User does not exist");
         }
-        if (userDetailsRepository.existsByEmail(request.getEmail())) {
+        final UserAuth userAuth = userAuthRepository.findByUsername(userName).get();
+        if (!userAuth.getUserDetail().getEmail().equals(request.getEmail()) && userDetailsRepository.existsByEmail(request.getEmail())) {
             throw new UserAuthException("Email Id belongs to another user");
         }
-        if (userDetailsRepository.existsByPhoneNumber(request.getPhoneNumber())) {
+        if (!userAuth.getUserDetail().getPhoneNumber().equals(request.getPhoneNumber()) && userDetailsRepository.existsByPhoneNumber(request.getPhoneNumber())) {
             throw new UserAuthException("Phone Number belongs to another user");
         }
-
         boolean validFirstGuardianUserId = userAuthRepository.existsByUsername(request.getFirstGuardianUserId());
         boolean validSecondGuardianUserId = userAuthRepository.existsByUsername(request.getSecondGuardianUserId());
         log.info("the validity of userid {} is {}, userId {} is {}",
                 request.getFirstGuardianUserId(), validFirstGuardianUserId,
                 request.getSecondGuardianUserId(), validSecondGuardianUserId);
 
-        final UserAuth userAuth = userAuthRepository.findByUsername(userName).get();
         final UserDetail userDetail = userAuth.getUserDetail();
 
         userDetail.setEmail(request.getEmail() != null ? request.getEmail() : userDetail.getEmail());

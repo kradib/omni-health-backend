@@ -51,4 +51,19 @@ public class UserAppointmentSchedule {
     @OneToMany(mappedBy = "appointment", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<AppointmentDocument> documents;
+
+
+    @Override
+    public String toString() {
+        return "UserAppointmentSchedule{" +
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", appointmentDateTime=" + appointmentDateTime +
+                ", appointmentStatus='" + appointmentStatus + '\'' +
+                ", prescription='" + prescription + '\'' +
+                ", slotId=" + slotId +
+                ", userDetail=" + (userDetail != null ? userDetail.getId() : "null") +
+                ", doctorDetail=" + (doctorDetail != null ? doctorDetail.getId() : "null") +
+                '}';
+    }
 }
