@@ -24,13 +24,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -251,21 +247,17 @@ public class UserAppointmentScheduleController {
         final String userName = getCurrentUsername();
         final AppointmentDocument documentEntity = documentService.getAppointmentDocument(userName, appointmentId, documentId);
 
-        Path filePath = Paths.get(documentEntity.getFilePath());
-        File file = filePath.toFile();
-        if (!file.exists() || !file.canRead()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "File not found or not readable");
+        String contentType = Files.probeContentType(Paths.get(documentEntity.getFilePath()));
+        if (contentType == null) {
+            contentType = "application/octet-stream"; // Fallback for unknown file types
         }
 
-        InputStreamResource resource = new InputStreamResource(new FileInputStream(file));
-        String contentType = Files.probeContentType(filePath);
-        if (contentType == null) {
-            contentType = "application/octet-stream";
-        }
+        InputStreamResource resource = documentService.getDocumentMedia(documentEntity.getFilePath());
+
         return ResponseEntity.ok()
                 .contentType(MediaType.parseMediaType(contentType))
                 .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "attachment; filename=\"" + file.getName() + "\"")
+                        "attachment; filename=\"" + documentEntity.getFilePath() + "\"")
                 .header(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.CONTENT_DISPOSITION)
                 .body(resource);
     }

@@ -12,20 +12,17 @@ import com.example.omni_health_app.dto.response.DocumentMetadata;
 import com.example.omni_health_app.exception.BadRequestException;
 import com.example.omni_health_app.exception.UserAuthException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
+
+import static com.example.omni_health_app.util.FileUtils.getFileExtension;
 
 
 @Service
@@ -38,6 +35,7 @@ public class DocumentService {
     private final UserAuthRepository userAuthRepository;
     private final UserAppointmentScheduleRepository userAppointmentScheduleRepository;
     private final AppointmentDocumentRepository appointmentDocumentRepository;
+    private final IDocumentProcessor documentProcessor;
 
 
     public DocumentMetadata uploadFile(MultipartFile file, String userName, String documentName)
@@ -53,19 +51,12 @@ public class DocumentService {
             throw new IllegalArgumentException("Only PDF and JPG files are allowed!");
         }
 
-        String uniqueFileName = UUID.randomUUID() + "_" + originalFilename;
-
-        Path userFolderPath = Paths.get(BASE_UPLOAD_DIR, userName);
-        if (!Files.exists(userFolderPath)) {
-            Files.createDirectories(userFolderPath);
-        }
-        Path filePath = userFolderPath.resolve(uniqueFileName);
-        Files.write(filePath, file.getBytes());
+        final String filePath = documentProcessor.uploadFile(file, originalFilename);
 
         DocumentEntity documentEntity = new DocumentEntity();
         documentEntity.setUserName(userName);
         documentEntity.setDocumentName(documentName);
-        documentEntity.setFilePath(filePath.toString());
+        documentEntity.setFilePath(filePath);
         documentEntity.setDateUploaded(LocalDateTime.now());
         documentRepository.save(documentEntity);
         return DocumentMetadata.builder()
@@ -95,18 +86,12 @@ public class DocumentService {
             throw new IllegalArgumentException("Only PDF and JPG files are allowed!");
         }
 
-        String uniqueFileName = UUID.randomUUID() + "_" + originalFilename;
+        final String filePath = documentProcessor.uploadFile(file, originalFilename);
 
-        Path userFolderPath = Paths.get(BASE_UPLOAD_DIR, userName);
-        if (!Files.exists(userFolderPath)) {
-            Files.createDirectories(userFolderPath);
-        }
-        Path filePath = userFolderPath.resolve(uniqueFileName);
-        Files.write(filePath, file.getBytes());
 
         AppointmentDocument appointmentDocument = AppointmentDocument.builder()
                 .appointment(userAppointmentScheduleOptional.get())
-                .filePath(filePath.toString())
+                .filePath(filePath)
                 .dateUploaded(LocalDateTime.now())
                 .documentName(documentName)
                 .build();
@@ -144,11 +129,7 @@ public class DocumentService {
         if(!documentEntityOptional.get().getUserName().equals(userName)) {
             throw new UserAuthException("Document does not belong to user");
         }
-        Path filePath = Paths.get(documentEntityOptional.get().getFilePath());
-        Resource resource = new UrlResource(filePath.toUri());
-        if (!resource.exists() || !resource.isReadable()) {
-            throw new BadRequestException("document does not exist");
-        }
+
         return documentEntityOptional.get();
     }
 
@@ -166,15 +147,13 @@ public class DocumentService {
             throw new BadRequestException(String.format("userName %s does not have access to the appointment " +
                     "documents", userName));
         }
-        Path filePath = Paths.get(appointmentDocumentOptional.get().getFilePath());
-        Resource resource = new UrlResource(filePath.toUri());
-        if (!resource.exists() || !resource.isReadable()) {
-            throw new BadRequestException("document does not exist");
-        }
+
         return appointmentDocumentOptional.get();
     }
 
-    private String getFileExtension(String filename) {
-        return filename.substring(filename.lastIndexOf(".") + 1);
+    public InputStreamResource getDocumentMedia(final String path) {
+        return documentProcessor.downloadFile(path);
     }
+
+
 }
