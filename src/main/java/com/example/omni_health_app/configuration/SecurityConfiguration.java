@@ -19,8 +19,10 @@ import java.util.List;
 public class SecurityConfiguration {
 
     // use your PC IP address
-    private static List<String> allowedOrigins = List.of("http://192.168.29.234:5173", "http://localhost:5173",
-            "http://192.168.29.234:5174", "http://localhost:5174");
+    private static List<String> allowedOrigins = List.of(
+            "http://localhost:5173", "http://192.168.29.234:5173",
+            "http://localhost:5174", "http://192.168.29.234:5174",
+            "http://localhost:5175", "http://192.168.29.234:5175");
 
 
     @Bean
