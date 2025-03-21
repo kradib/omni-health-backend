@@ -58,9 +58,9 @@ public class DoctorService {
                 .build();
     }
 
-    public ListDoctorsResponseData listDoctors(int page, int size) {
+    public ListDoctorsResponseData listDoctors(int page, String name, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        Page<UserAuth> users = userAuthRepository.findByRolesContaining(DOCTOR_ROLE, pageable);
+        Page<UserAuth> users = userAuthRepository.findByRoleAndName(DOCTOR_ROLE, name, pageable);
         final List<UserDetail> userDetails =  users.stream()
                 .map(UserAuth::getUserDetail)
                 .toList();

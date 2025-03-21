@@ -127,15 +127,11 @@ public class AdminService {
         log.info("Successfully deleted user with ID {}", userId);
     }
 
-    public UserDetailsWithRoleResponseData listUsers(String roles, final int page, final int size) {
-        Page<UserAuth> users;
+    public UserDetailsWithRoleResponseData listUsers(String roles, final int page, final int size, final String name) {
         Pageable pageable = PageRequest.of(page, size);
-
-        if (roles != null && !roles.isEmpty()) {
-            users = userAuthRepository.findByRolesContaining(roles, pageable);
-        } else {
-            users = userAuthRepository.findAll(pageable);
-        }
+        final Page<UserAuth> users = userAuthRepository.findByRoleAndName(roles == null || roles.isEmpty() ? null : roles,
+                name == null || name.isEmpty() ? null : name,
+                pageable);
 
         final List<UserDetailWithRole> userDetailWithRoles = users.stream()
                 .map(userAuth -> new UserDetailWithRole(userAuth.getUserDetail(), userAuth.getRoles()))

@@ -91,7 +91,7 @@ public class AdminController {
         return ResponseEntity.ok(responseWrapper);
     }
 
-    @DeleteMapping("/deleteUser/{userId}")
+    @DeleteMapping("/{userId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ResponseWrapper<Void>> deleteUser(@PathVariable Long userId) throws UserAuthException {
         log.info("Received delete user request for userId {}", userId);
@@ -111,11 +111,12 @@ public class AdminController {
     public ResponseEntity<ResponseWrapper<UserDetailsWithRoleResponseData>> listUsers(
             @RequestParam(value = "roles", required = false) String roles,
             @RequestParam(value = "page", required = false, defaultValue = "0") int page,
-            @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+            @RequestParam(value = "size", required = false, defaultValue = "10") int size,
+            @RequestParam(value = "name", required = false) String name) {
         log.info("Received user listing request with role filter: {}", roles);
 
         final ResponseWrapper<UserDetailsWithRoleResponseData> responseWrapper = UserDetailsWithRoleResponse.builder()
-                .data(adminService.listUsers(roles, page, size))
+                .data(adminService.listUsers(roles, page, size, name))
                 .responseMetadata(ResponseMetadata.builder()
                         .statusCode(HttpStatus.OK.value())
                         .errorCode(0)
