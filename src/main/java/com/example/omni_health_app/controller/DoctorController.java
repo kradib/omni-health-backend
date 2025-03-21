@@ -46,13 +46,11 @@ public class DoctorController {
     }
 
     @GetMapping
-    public ResponseEntity<ResponseWrapper<ListDoctorsResponseData>> listDoctors() {
+    public ResponseEntity<ResponseWrapper<ListDoctorsResponseData>> listDoctors(@RequestParam(value = "page", required = false, defaultValue = "0") int page,
+                                                                                @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
         log.info("Received request to fetch doctor list");
         final ResponseWrapper<ListDoctorsResponseData> responseWrapper = ListDoctorsResponse.builder()
-                .data(ListDoctorsResponseData.builder()
-                        .success(true)
-                        .doctorDetails(doctorService.listDoctors())
-                        .build())
+                .data(doctorService.listDoctors(page, size))
                 .responseMetadata(ResponseMetadata.builder()
                         .statusCode(HttpStatus.OK.value())
                         .errorCode(0)

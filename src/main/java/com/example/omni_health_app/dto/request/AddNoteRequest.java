@@ -1,12 +1,13 @@
 package com.example.omni_health_app.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
-import org.checkerframework.common.aliasing.qual.Unique;
 
 @Data
 @Builder
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AddNoteRequest {
 
     @NonNull

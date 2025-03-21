@@ -6,17 +6,26 @@ import com.example.omni_health_app.domain.repositories.UserAppointmentScheduleRe
 import com.example.omni_health_app.domain.repositories.UserAuthRepository;
 import com.example.omni_health_app.domain.repositories.UserDetailsRepository;
 import com.example.omni_health_app.dto.request.AddUserRequest;
+import com.example.omni_health_app.dto.request.AdminSignInRequest;
 import com.example.omni_health_app.dto.request.UserDetailsUpdateRequest;
-import com.example.omni_health_app.dto.response.UserDetailWithRoles;
+import com.example.omni_health_app.dto.response.UserDetailWithRole;
+import com.example.omni_health_app.dto.response.UserDetailsWithRoleResponseData;
+import com.example.omni_health_app.dto.response.UserSignInResponseData;
 import com.example.omni_health_app.exception.BadRequestException;
 import com.example.omni_health_app.exception.UserAuthException;
+import com.example.omni_health_app.util.TokenUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
+
+import static com.example.omni_health_app.util.HashUtil.isHashMatch;
 
 @Service
 @RequiredArgsConstructor
@@ -29,8 +38,16 @@ public class AdminService {
     private final UserDetailsRepository userDetailsRepository;
     private final UserAuthService userAuthService;
     private final PasswordEncoder passwordEncoder;
+    private final TokenUtil tokenUtil;
+
+    @Value("${omni.auth.masterKey}")
+    private String encryptedMasterKey;
+    @Value("${omni.auth.adminKey}")
+    private String encryptedAdminKey;
+
 
     public UserDetail addUser(AddUserRequest request) throws UserAuthException, BadRequestException {
+        log.info("request {}", request);
         if ("doctor".equalsIgnoreCase(request.getRoles())) {
             if (request.getMajor() == null || request.getMajor().trim().isEmpty()) {
                 throw new BadRequestException("Major is required for Doctor role.");
@@ -39,17 +56,26 @@ public class AdminService {
                 throw new BadRequestException("Location is required for Doctor role.");
             }
         }
+        if("admin".equalsIgnoreCase(request.getRoles())) {
+            if (!isHashMatch((request).getAdminMasterKey(), encryptedMasterKey)) {
+                throw new BadRequestException("Admin details can't be added");
+            }
+        }
         if (userAuthRepository.existsByUsername(request.getUsername())) {
             throw new UserAuthException("Username is already taken");
         }
         if (userDetailsRepository.existsByEmail(request.getEmail())) {
-            throw new UserAuthException("Email Id is already taken");
+            throw new UserAuthException("Email Id belongs to some one else");
+        }
+        if (userDetailsRepository.existsByPhoneNumber(request.getPhoneNumber())) {
+            throw new UserAuthException("Phone Number belongs to some one else");
         }
         final UserDetail userDetail = UserDetail.builder()
                 .email(request.getEmail())
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .phoneNumber(request.getPhoneNumber())
+                .dateOfBirth(request.getDateOfBirth())
                 .major(request.getMajor())
                 .location(request.getLocation())
                 .build();
@@ -66,6 +92,26 @@ public class AdminService {
         return savedUser.getUserDetail();
     }
 
+    public UserSignInResponseData signIn(AdminSignInRequest request) throws UserAuthException {
+        UserAuth userAuth = userAuthRepository.findByUsername(request.getUsername())
+                .orElseThrow(() -> new UserAuthException("The User name does not exist"));
+
+        if (!passwordEncoder.matches(request.getPassword(), userAuth.getPassword())) {
+            throw new UserAuthException("Invalid credential provided");
+        }
+
+        if (!isHashMatch(request.getMasterKey(), encryptedMasterKey)) {
+            throw new UserAuthException("Invalid credential provided");
+        }
+
+        return UserSignInResponseData.builder()
+                .authToken(tokenUtil.generateToken(userAuth.getUsername(),userAuth))
+                .userDetail(userAuth.getUserDetail())
+                .build();
+    }
+
+
+
     public UserDetail updateUser(Long userId, UserDetailsUpdateRequest request) throws BadRequestException, UserAuthException {
         UserDetail existingUser = userDetailsRepository.findById(userId)
                 .orElseThrow(() -> new BadRequestException("User not found"));
@@ -81,18 +127,26 @@ public class AdminService {
         log.info("Successfully deleted user with ID {}", userId);
     }
 
-    public List<UserDetailWithRoles> listUsers(String role) {
-        List<UserAuth> users;
+    public UserDetailsWithRoleResponseData listUsers(String roles, final int page, final int size) {
+        Page<UserAuth> users;
+        Pageable pageable = PageRequest.of(page, size);
 
-        if (role != null && !role.isEmpty()) {
-            users = userAuthRepository.findByRolesContaining(role);
+        if (roles != null && !roles.isEmpty()) {
+            users = userAuthRepository.findByRolesContaining(roles, pageable);
         } else {
-            users = userAuthRepository.findAll();
+            users = userAuthRepository.findAll(pageable);
         }
 
-        return users.stream()
-                .map(userAuth -> new UserDetailWithRoles(userAuth.getUserDetail(), userAuth.getRoles()))
-                .collect(Collectors.toList());
+        final List<UserDetailWithRole> userDetailWithRoles = users.stream()
+                .map(userAuth -> new UserDetailWithRole(userAuth.getUserDetail(), userAuth.getRoles()))
+                .toList();
+        return UserDetailsWithRoleResponseData.builder()
+                .userDetailWithRole(userDetailWithRoles)
+                .success(true)
+                .currentPage(page)
+                .totalPages(users.getTotalPages())
+                .totalElements(users.getTotalElements())
+                .build();
     }
 
 }

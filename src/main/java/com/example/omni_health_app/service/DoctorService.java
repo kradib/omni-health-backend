@@ -7,15 +7,18 @@ import com.example.omni_health_app.domain.model.AppointmentStatus;
 import com.example.omni_health_app.domain.repositories.UserAppointmentScheduleRepository;
 import com.example.omni_health_app.domain.repositories.UserAuthRepository;
 import com.example.omni_health_app.dto.request.UpdateAppointmentStatusRequest;
+import com.example.omni_health_app.dto.response.ListDoctorsResponseData;
 import com.example.omni_health_app.dto.response.UpdateAppointmentResponseData;
 import com.example.omni_health_app.exception.BadRequestException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static com.example.omni_health_app.util.Constants.DOCTOR_ROLE;
 
@@ -31,7 +34,7 @@ public class DoctorService {
        
 
         if (dto.getPrescription() == null || dto.getPrescription().trim().isEmpty()) {
-            throw new IllegalArgumentException("Prescription required when status is completed");
+            throw new BadRequestException("Prescription required when status is completed");
         }
 
 
@@ -55,11 +58,21 @@ public class DoctorService {
                 .build();
     }
 
-    public List<UserDetail> listDoctors() {
-        List<UserAuth> users = userAuthRepository.findByRolesContaining(DOCTOR_ROLE);
-        return users.stream()
+    public ListDoctorsResponseData listDoctors(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<UserAuth> users = userAuthRepository.findByRolesContaining(DOCTOR_ROLE, pageable);
+        final List<UserDetail> userDetails =  users.stream()
                 .map(UserAuth::getUserDetail)
-                .collect(Collectors.toList());
+                .toList();
+        return ListDoctorsResponseData.builder()
+                .doctorDetails(userDetails)
+                .success(true)
+                .totalPages(users.getTotalPages())
+                .currentPage(page)
+                .totalElements(users.getTotalElements())
+                .build();
+
+
     }
 
 

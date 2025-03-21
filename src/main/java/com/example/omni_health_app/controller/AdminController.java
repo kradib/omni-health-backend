@@ -1,12 +1,13 @@
 package com.example.omni_health_app.controller;
 
 
-import com.example.omni_health_app.dto.request.*;
+import com.example.omni_health_app.dto.request.AddUserRequest;
+import com.example.omni_health_app.dto.request.AdminSignInRequest;
+import com.example.omni_health_app.dto.request.UserDetailsUpdateRequest;
 import com.example.omni_health_app.dto.response.*;
 import com.example.omni_health_app.exception.BadRequestException;
 import com.example.omni_health_app.exception.UserAuthException;
 import com.example.omni_health_app.service.AdminService;
-import com.example.omni_health_app.service.UserAuthService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,8 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 
 @RestController
 @RequiredArgsConstructor
@@ -24,13 +23,29 @@ import java.util.List;
 @Slf4j
 public class AdminController {
 
-    private final UserAuthService userAuthService;
     private final AdminService adminService;
+
+    @PostMapping
+    public ResponseEntity<ResponseWrapper<AddUserResponseData>> createAdmin(@RequestBody @NonNull AddUserRequest request) throws UserAuthException, BadRequestException {
+        log.info("Receive add admin request {}", request);
+        final ResponseWrapper<AddUserResponseData> responseWrapper = AddUserResponse.builder()
+                .data(AddUserResponseData.builder()
+                        .userDetail(adminService.addUser(request))
+                        .build())
+                .responseMetadata(ResponseMetadata.builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .errorCode(0)
+                        .build())
+                .build();
+        return ResponseEntity.ok(responseWrapper);
+
+    }
+
 
 
     @PostMapping("/addUser")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ResponseWrapper<AddUserResponseData>> signUp(@RequestBody @NonNull AddUserRequest request) throws UserAuthException, BadRequestException {
+    public ResponseEntity<ResponseWrapper<AddUserResponseData>> addUser(@RequestBody @NonNull AddUserRequest request) throws UserAuthException, BadRequestException {
         log.info("Receive add user request {}", request);
         final ResponseWrapper<AddUserResponseData> responseWrapper = AddUserResponse.builder()
                 .data(AddUserResponseData.builder()
@@ -43,6 +58,19 @@ public class AdminController {
                 .build();
         return ResponseEntity.ok(responseWrapper);
 
+    }
+
+    @PostMapping("/signin")
+    public ResponseEntity<ResponseWrapper<UserSignInResponseData>> signIn(@RequestBody @NonNull AdminSignInRequest request) throws UserAuthException {
+        log.info("Received user sign-in request for username: {}", request.getUsername());
+        final ResponseWrapper<UserSignInResponseData> responseWrapper = UserSignInResponse.builder()
+                .data(adminService.signIn(request))
+                .responseMetadata(ResponseMetadata.builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .errorCode(0)
+                        .build())
+                .build();
+        return ResponseEntity.ok(responseWrapper);
     }
 
 
@@ -80,15 +108,19 @@ public class AdminController {
 
     @GetMapping("/listUsers")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<ResponseWrapper<List<UserDetailWithRoles>>> listUsers(
-            @RequestParam(value = "role", required = false) String role) {
-        log.info("Received user listing request with role filter: {}", role);
-        List<UserDetailWithRoles> users = adminService.listUsers(role);
+    public ResponseEntity<ResponseWrapper<UserDetailsWithRoleResponseData>> listUsers(
+            @RequestParam(value = "roles", required = false) String roles,
+            @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+            @RequestParam(value = "size", required = false, defaultValue = "10") int size) {
+        log.info("Received user listing request with role filter: {}", roles);
 
-        ResponseMetadata metadata = new ResponseMetadata("1234", null, HttpStatus.OK.value(), 0);
-
-        ResponseWrapper<List<UserDetailWithRoles>> responseWrapper = new ResponseWrapper<>(users, metadata);
-
+        final ResponseWrapper<UserDetailsWithRoleResponseData> responseWrapper = UserDetailsWithRoleResponse.builder()
+                .data(adminService.listUsers(roles, page, size))
+                .responseMetadata(ResponseMetadata.builder()
+                        .statusCode(HttpStatus.OK.value())
+                        .errorCode(0)
+                        .build())
+                .build();
         return ResponseEntity.ok(responseWrapper);
     }
 

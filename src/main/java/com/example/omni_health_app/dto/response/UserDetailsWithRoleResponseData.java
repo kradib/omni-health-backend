@@ -2,7 +2,6 @@
 package com.example.omni_health_app.dto.response;
 
 
-import com.example.omni_health_app.domain.entity.UserDetail;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,10 +13,10 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ListDoctorsResponseData {
+public class UserDetailsWithRoleResponseData {
 
     private boolean success;
-    private List<UserDetail> doctorDetails;
+    private List<UserDetailWithRole> userDetailWithRole;
     private int totalPages;
     private long totalElements;
     private int currentPage;

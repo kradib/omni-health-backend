@@ -1,13 +1,16 @@
 package com.example.omni_health_app.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import lombok.*;
 import org.checkerframework.common.aliasing.qual.Unique;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.NonNull;
+import java.time.LocalDate;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class AddUserRequest {
 
     @NonNull
@@ -28,5 +31,8 @@ public class AddUserRequest {
 
     private String major;
     private String location;
+    @NonNull
+    private LocalDate dateOfBirth;
+    private String adminMasterKey;
 
 }

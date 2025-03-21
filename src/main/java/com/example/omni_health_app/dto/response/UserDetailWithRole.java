@@ -7,7 +7,7 @@ import lombok.Data;
 
 @Data
 @AllArgsConstructor
-public class UserDetailWithRoles {
+public class UserDetailWithRole {
     private UserDetail userDetail;
     private String roles;
 }

@@ -36,6 +36,8 @@ omni:
   auth:
     secret: 592d40df8f451da901e27c41755fb46a75f1572351dc2478ecca20de2b64baafac8bf0cf4af8a4a746030804f4dc954236e9b2143eddaa097b4a568f397cceca #128 char secret
     expiration: 43200000 #12 hours in milliseconds
+    masterKey: OMWuK80fEqomnkWujIdi8DBjClE33W0ceZwBlibzMJY=
+    adminKey: OMWuK80fEqomnkWujIdi8DBjClE33W0ceZwBlibzMJY=
   slot-booking: 10
 
 aws:
