@@ -33,6 +33,9 @@ public class AddUserRequest {
     private String location;
     @NonNull
     private LocalDate dateOfBirth;
+    private Double weight;
+    private Integer height;
+    private String bloodGroup;
     private String adminMasterKey;
 
 }

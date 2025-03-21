@@ -78,6 +78,9 @@ public class AdminService {
                 .dateOfBirth(request.getDateOfBirth())
                 .major(request.getMajor())
                 .location(request.getLocation())
+                .bloodGroup(request.getBloodGroup())
+                .height(request.getHeight())
+                .weight(request.getWeight())
                 .build();
 
         final UserAuth userAuth = UserAuth.builder()
