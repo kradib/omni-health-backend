@@ -146,13 +146,11 @@ public interface UserAppointmentScheduleRepository extends JpaRepository<UserApp
             "WHERE u.slotId = :slotId " +
             "AND FUNCTION('DATE', u.appointmentDateTime) = :appointmentDate " +
             "AND u.username = :username " +
-            "AND u.doctorDetail.id = :doctorId " +
             "AND u.appointmentStatus != \"cancelled\"")
     long countBySlotIdDateUsernameAndDoctor(
             @Param("slotId") int slotId,
             @Param("appointmentDate") LocalDate appointmentDate,
-            @Param("username") String username,
-            @Param("doctorId") Long doctorId);
+            @Param("username") String username);
 
 
 

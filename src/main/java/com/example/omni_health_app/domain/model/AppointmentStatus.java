@@ -1,7 +1,6 @@
 package com.example.omni_health_app.domain.model;
 
 import lombok.Getter;
-import software.amazon.awssdk.services.s3.endpoints.internal.Value;
 
 import java.util.Arrays;
 import java.util.Map;
@@ -25,7 +24,7 @@ public enum AppointmentStatus {
         this.status = i;
     }
 
-    public static AppointmentStatus from(int fromValue) {
+    public static AppointmentStatus from(String fromValue) {
         return byStatus.get(fromValue);
     }
 }

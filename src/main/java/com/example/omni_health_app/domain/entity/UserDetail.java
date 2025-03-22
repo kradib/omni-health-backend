@@ -1,5 +1,6 @@
 package com.example.omni_health_app.domain.entity;
 
+import com.example.omni_health_app.domain.model.Gender;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
@@ -32,6 +33,7 @@ public class UserDetail {
     private Double weight;
     private Integer height;
     private String bloodGroup;
+    private Gender gender;
     @OneToOne(mappedBy = "userDetail")
     @JsonBackReference
     @ToString.Exclude

@@ -1,5 +1,6 @@
 package com.example.omni_health_app.dto.request;
 
+import com.example.omni_health_app.domain.model.Gender;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NonNull;
@@ -27,5 +28,6 @@ public class UserSignUpRequest {
     private Double weight;
     private Integer height;
     private String bloodGroup;
+    private Gender gender;
 
 }

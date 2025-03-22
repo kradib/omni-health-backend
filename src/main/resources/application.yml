@@ -19,7 +19,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: omnihealthapp@gmail.com # your email
-    password: Feddqvzrvvnqdihs #your email app passowrd
+    password: pbhsyuunrkfvrjsb  #your email app passowrd
     properties:
       mail:
         smtp:

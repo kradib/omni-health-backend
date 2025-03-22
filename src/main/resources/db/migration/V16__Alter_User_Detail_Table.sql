@@ -1,0 +1,2 @@
+ALTER TABLE user_detail
+ADD COLUMN gender VARCHAR(10) NULL;

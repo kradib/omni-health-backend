@@ -66,6 +66,7 @@ public class UserAuthService {
                 .height(request.getHeight())
                 .weight(request.getWeight())
                 .bloodGroup(request.getBloodGroup())
+                .gender(request.getGender())
                 .build();
 
         final UserAuth userAuth = UserAuth.builder()

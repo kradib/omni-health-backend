@@ -81,6 +81,7 @@ public class AdminService {
                 .bloodGroup(request.getBloodGroup())
                 .height(request.getHeight())
                 .weight(request.getWeight())
+                .gender(request.getGender())
                 .build();
 
         final UserAuth userAuth = UserAuth.builder()

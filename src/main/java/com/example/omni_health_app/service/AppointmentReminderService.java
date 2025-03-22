@@ -18,7 +18,7 @@ import java.util.List;
 public class AppointmentReminderService {
 
     private final UserAppointmentScheduleRepository userAppointmentScheduleRepository;
-    private final EmailNotificationService emailNotificationService;
+    private final INotificationService notificationService;
     private final UserDetailsRepository userDetailsRepository;
 
     public void notifyPendingAppointments() {
@@ -29,7 +29,7 @@ public class AppointmentReminderService {
         List<UserAppointmentSchedule> pendingAppointments = userAppointmentScheduleRepository.findPendingAppointments(fromDate, toDate);
         log.info("fetched all scheduled appointments {}", pendingAppointments);
         for (UserAppointmentSchedule appointment : pendingAppointments) {
-            emailNotificationService.sendNotification(appointment.getUserDetail().getEmail(), "Upcoming Appointment Reminder", buildUserEmailContent(appointment));
+            notificationService.sendNotification(appointment.getUserDetail().getEmail(), "Upcoming Appointment Reminder", buildUserEmailContent(appointment));
             if (appointment.getUserDetail().getFirstGuardianUserId() != null) {
                 sendGuardianNotification(appointment, appointment.getUserDetail().getFirstGuardianUserId());
             }
@@ -42,7 +42,7 @@ public class AppointmentReminderService {
     private void sendGuardianNotification(UserAppointmentSchedule appointment, String guardianUserName) {
         UserDetail guardianDetail = userDetailsRepository.findByUsername(guardianUserName);
         if (guardianDetail.getEmail() != null) {
-            emailNotificationService.sendNotification(
+            notificationService.sendNotification(
                     guardianDetail.getEmail(), "Upcoming Appointment Reminder for your dependents",
                     buildGuardianEmailContent(appointment, guardianDetail.getFirstName())
             );

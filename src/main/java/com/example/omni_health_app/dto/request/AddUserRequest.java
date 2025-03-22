@@ -1,5 +1,6 @@
 package com.example.omni_health_app.dto.request;
 
+import com.example.omni_health_app.domain.model.Gender;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.*;
 import org.checkerframework.common.aliasing.qual.Unique;
@@ -36,6 +37,7 @@ public class AddUserRequest {
     private Double weight;
     private Integer height;
     private String bloodGroup;
+    private Gender gender;
     private String adminMasterKey;
 
 }

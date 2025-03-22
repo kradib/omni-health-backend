@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static com.example.omni_health_app.domain.model.UserRole.*;
+import static com.example.omni_health_app.util.EmailContentBuilder.*;
 
 @Service
 @RequiredArgsConstructor
@@ -42,6 +43,7 @@ public class UserAppointmentScheduleService {
     private final UserDetailsRepository userDetailsRepository;
     private final AppointmentSlotRepository appointmentSlotRepository;
     private final AppointmentSlotCountCalculator appointmentSlotCountCalculator;
+    private final INotificationService notificationService;
 
     public List<AppointmentSlotAvailable> getAppointmentSlotsPerDoctor(final long doctorId,
                                                                        final LocalDate date) throws BadRequestException {
@@ -68,9 +70,9 @@ public class UserAppointmentScheduleService {
         long appointCount =
                 userAppointmentScheduleRepository.countBySlotIdDateUsernameAndDoctor(dto.getSlotId(),
                         dto.getAppointmentDateTime().toLocalDate(),
-                        userAuth.getUsername(), dto.getDoctorId());
+                        userAuth.getUsername());
         if (appointCount > 0) {
-            throw new AppointmentAlreadyExistsException("Appointment already exists for user");
+            throw new AppointmentAlreadyExistsException("You have an already existing appointment with a doctor");
         }
         final UserAppointmentSchedule schedule = UserAppointmentSchedule.builder()
                 .appointmentDateTime(dto.getAppointmentDateTime())
@@ -86,6 +88,13 @@ public class UserAppointmentScheduleService {
         appointmentSlotRepository.upsertAppointmentSlot(createdUserAppointmentSchedule.getDoctorDetail().getId(),
                 createdUserAppointmentSchedule.getSlotId(),
                 createdUserAppointmentSchedule.getAppointmentDateTime().toLocalDate(), 1);
+
+        notificationService.sendNotification(createdUserAppointmentSchedule.getUserDetail().getEmail(), "Appointment " +
+                        "Created", buildUserEmailContentForAppointmentCreation(createdUserAppointmentSchedule));
+        notificationService.sendNotification(createdUserAppointmentSchedule.getUserDetail().getEmail(), "Appointment " +
+                "Created", buildUserEmailContentForAppointmentCreation(createdUserAppointmentSchedule));
+        notificationService.sendNotification(createdUserAppointmentSchedule.getDoctorDetail().getEmail(), "Appointment " +
+                "Created", buildDoctorEmailContentForAppointmentCreation(createdUserAppointmentSchedule));
 
         return CreateAppointmentResponseData.builder()
                 .success(true)
@@ -125,6 +134,10 @@ public class UserAppointmentScheduleService {
         appointmentSlotRepository.upsertAppointmentSlot(userAppointmentSchedule.getDoctorDetail().getId(),
                 userAppointmentSchedule.getSlotId(),
                 userAppointmentSchedule.getAppointmentDateTime().toLocalDate(), -1);
+        notificationService.sendNotification(userAppointmentSchedule.getUserDetail().getEmail(), "Appointment " +
+                "Cancelled", buildUserEmailContentForAppointmentCancellation(userAppointmentSchedule));
+        notificationService.sendNotification(userAppointmentSchedule.getDoctorDetail().getEmail(), "Appointment " +
+                "Cancelled", buildDoctorEmailContentForAppointmentCancellation(userAppointmentSchedule));
         return CancelAppointmentResponseData.builder()
                 .success(true)
                 .appointmentId(dto.getAppointmentId())
@@ -169,6 +182,10 @@ public class UserAppointmentScheduleService {
         appointmentSlotRepository.upsertAppointmentSlot(userAppointmentSchedule.getDoctorDetail().getId(),
                 previousAppointmentSlot,
                 previousAppointmentDate, -1);
+        notificationService.sendNotification(userAppointmentSchedule.getUserDetail().getEmail(), "Appointment " +
+                "Updated", buildUserEmailContentForAppointmentUpdate(userAppointmentSchedule));
+        notificationService.sendNotification(userAppointmentSchedule.getDoctorDetail().getEmail(), "Appointment " +
+                "Updated", buildDoctorEmailContentForAppointmentUpdate(userAppointmentSchedule));
 
         return UpdateAppointmentResponseData.builder()
                 .success(true)
