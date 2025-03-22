@@ -106,6 +106,9 @@ public class AdminService {
         if (!isHashMatch(request.getMasterKey(), encryptedMasterKey)) {
             throw new UserAuthException("Invalid credential provided");
         }
+        if(!"admin".equalsIgnoreCase(userAuth.getRoles())) {
+            throw new UserAuthException("Invalid attempt to log in");
+        }
 
         return UserSignInResponseData.builder()
                 .authToken(tokenUtil.generateToken(userAuth.getUsername(),userAuth))
