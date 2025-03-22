@@ -33,6 +33,7 @@ public class UserDetail {
     private Double weight;
     private Integer height;
     private String bloodGroup;
+    @Enumerated(EnumType.STRING)
     private Gender gender;
     @OneToOne(mappedBy = "userDetail")
     @JsonBackReference
